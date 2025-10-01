@@ -1147,7 +1147,7 @@
                             <span class="panel-answer" id="rightAnswer"></span>
                         </button>
                     </div>
-                    <div class="bridge-timer" id="bridgeTimer">Time: 60s</div>
+                    <div class="bridge-timer" id="bridgeTimer">Time: 45s</div>
                 </div>
             </div>
             
@@ -1210,7 +1210,7 @@
             totalSteps: 10,
             lives: 3,
             playerPosition: 0,
-            timeLeft: 60,
+            timeLeft: 45,
             currentEquation: null,
             correctAnswer: null,
             bridgeTimer: null,
@@ -2301,7 +2301,7 @@
                 if (isCorrect) {
                     correctAnswer();
                 } else {
-                    gameOver('TRY AGAIN!', `Not quite right! The correct answers were: ${gameState.currentEquation.solutions.join(' and ')}`);
+                    gameOver('Try Again!', `Don't worry and stay calm! The correct answer was: ${gameState.currentEquation.solutions.join(' and ')}`);
                 }
             }
         }
@@ -2348,7 +2348,7 @@
                 clearInterval(gameState.challengeTimer);
             }
             audioSystem.stopTicker();
-            audioSystem.stopBackgroundMusic();
+            // Keep background music playing through victory
             
             // Play victory sound
             audioSystem.playSound('victorySound');
@@ -2371,7 +2371,7 @@
                 clearInterval(gameState.challengeTimer);
             }
             audioSystem.stopTicker();
-            audioSystem.stopBackgroundMusic();
+            // Keep background music playing through game over
             
             // Play failure sound
             audioSystem.playSound('failureSound');
@@ -2542,7 +2542,7 @@
                     totalSteps: 10,
                     lives: 3,
                     playerPosition: 0,
-                    timeLeft: 60,
+                    timeLeft: 45,
                     currentEquation: null,
                     correctAnswer: null,
                     bridgeTimer: null,
@@ -2634,7 +2634,7 @@
                 clearInterval(glassBridgeState.bridgeTimer);
             }
             audioSystem.stopTicker();
-            audioSystem.stopBackgroundMusic();
+            // Keep background music playing through restart
             
             // Reset both game states
             gameState = {
@@ -2660,7 +2660,7 @@
                 totalSteps: 10,
                 lives: 3,
                 playerPosition: 0,
-                timeLeft: 60,
+                timeLeft: 45,
                 currentEquation: null,
                 correctAnswer: null,
                 bridgeTimer: null,
@@ -2878,7 +2878,7 @@
             glassBridgeState.leftIsCorrect = leftIsCorrect;
             
             // Start timer
-            glassBridgeState.timeLeft = 60;
+            glassBridgeState.timeLeft = 45;
             startBridgeTimer();
         }
 
@@ -3219,7 +3219,7 @@
                 elements.gameOverTitle.textContent = 'BRIDGE CHALLENGE OVER!';
             }
             if (elements.gameOverText) {
-                elements.gameOverText.textContent = 'You used all your attempts! Practice more and try again!';
+                elements.gameOverText.textContent = 'Don\'t worry and stay calm! We can try this again!';
             }
         }
 
