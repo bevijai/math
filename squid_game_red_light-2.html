@@ -1207,7 +1207,7 @@
         // Glass Bridge game state
         let glassBridgeState = {
             currentStep: 1,
-            totalSteps: 10,
+            totalSteps: 5,
             lives: 3,
             playerPosition: 0,
             timeLeft: 45,
@@ -2539,7 +2539,7 @@
                 // Reset glass bridge state
                 glassBridgeState = {
                     currentStep: 1,
-                    totalSteps: 10,
+                    totalSteps: 5,
                     lives: 3,
                     playerPosition: 0,
                     timeLeft: 45,
@@ -2657,7 +2657,7 @@
             
             glassBridgeState = {
                 currentStep: 1,
-                totalSteps: 10,
+                totalSteps: 5,
                 lives: 3,
                 playerPosition: 0,
                 timeLeft: 45,
@@ -2976,10 +2976,10 @@
             // Update visual
             generateBridgeVisual();
             
-            // Show confirmation dialog before moving to next question
+            // Auto-proceed to next question after 1 second
             setTimeout(() => {
-                showNextQuestionConfirmation();
-            }, 2000);
+                startBridgeChallenge();
+            }, 1000);
         }
 
         function handleTimeout() {
