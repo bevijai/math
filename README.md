@@ -71,6 +71,13 @@ An educational math game inspired by the popular Netflix series "Squid Game". Th
 - Music pause/resume functionality
 - Volume controls
 
+### 🎵 Audio Assets Note
+The background music file (`Background_music_Squid.mp3`) is not included in the repository due to its large size (13MB). To run the game with full audio experience:
+
+1. Add your own background music file to the `assets/` directory
+2. Update the audio path in the HTML file if needed
+3. Or run the game without background music (sound effects will still work)
+
 ## 🏗️ Installation & Development
 
 ### Prerequisites
