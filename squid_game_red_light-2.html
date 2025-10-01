@@ -1029,7 +1029,7 @@
             <div class="player-legs"></div>
         </div>
 
-        <div class="challenge-timer" id="challengeTimerDisplay">Time: 75s</div>
+        <div class="challenge-timer" id="challengeTimerDisplay">Time: 45s</div>
         <div class="progress" id="progress">Round: 1/5</div>
         <div class="status" id="status">GREEN LIGHT!</div>
         <button class="quit-button" id="quitButton">❌ QUIT GAME</button>
@@ -1229,7 +1229,7 @@
         let gameState = {
             round: 1,
             maxRounds: 5,
-            timeLeft: 75,
+            timeLeft: 45,
             playerPosition: 50,
             movementPerRound: 0, // Will be calculated dynamically
             gameRunning: false,
@@ -2195,7 +2195,7 @@
             elements.challengeTimerDisplay.style.display = 'block';
             
             // Start countdown
-            gameState.timeLeft = 75;
+            gameState.timeLeft = 45;
             updateTimer();
             
             // Start ticker sound for urgency
@@ -2564,7 +2564,7 @@
                 gameState = {
                     round: 1,
                     maxRounds: 5,
-                    timeLeft: 75,
+                    timeLeft: 45,
                     playerPosition: 50,
                     movementPerRound: 0, // Will be calculated dynamically
                     gameRunning: false,
@@ -2683,7 +2683,7 @@
             gameState = {
                 round: 1,
                 maxRounds: 5,
-                timeLeft: 75,
+                timeLeft: 45,
                 playerPosition: 50,
                 movementPerRound: 0, // Will be calculated dynamically
                 gameRunning: false,
