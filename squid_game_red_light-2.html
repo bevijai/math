@@ -1241,7 +1241,8 @@
             tickerInterval: null,
             gameMode: null, // 'single' or 'multiplayer'
             isMultiplayer: false,
-            currentGame: null // 'redlight' or 'glassbridge'
+            currentGame: null, // 'redlight' or 'glassbridge'
+            localMultiplayer: null // For local multiplayer on same device
         };
 
         // Glass Bridge game state
@@ -2397,6 +2398,13 @@
             createConfetti();
             
             elements.challengeTimerDisplay.style.display = 'none';
+            
+            // Handle local multiplayer victory
+            if (gameState.localMultiplayer && gameState.localMultiplayer.isActive) {
+                handleLocalMultiplayerVictory();
+                return;
+            }
+            
             elements.gameOver.classList.add('victory');
             elements.gameOverTitle.textContent = 'VICTORY!';
             elements.gameOverText.textContent = 'You survived Red Light Green Light!';
@@ -2405,6 +2413,44 @@
             
             // Keep quit button visible even during victory
             // elements.quitButton.style.display = 'block';
+        }
+
+        // Handle local multiplayer victory
+        function handleLocalMultiplayerVictory() {
+            const currentPlayer = gameState.localMultiplayer.currentPlayer;
+            const currentPlayerName = gameState.localMultiplayer.players[currentPlayer];
+            
+            // Record perfect score for winner
+            gameState.localMultiplayer.scores[currentPlayer] = gameState.maxRounds;
+            
+            elements.gameOver.classList.add('victory');
+            elements.gameOverTitle.textContent = '🏆 PERFECT VICTORY!';
+            elements.gameOverText.innerHTML = `
+                <div style="text-align: center;">
+                    <h3 style="color: #00ff00;">${currentPlayerName} completed all rounds!</h3>
+                    <p>Amazing performance! 🎉</p>
+                    <button onclick="continueOrFinishMultiplayer()" class="level-btn beginner-btn" style="margin-top: 20px;">
+                        ✨ Continue
+                    </button>
+                </div>
+            `;
+            elements.gameOver.style.display = 'block';
+            elements.player.classList.add('pulse');
+        }
+
+        // Continue or finish multiplayer after victory
+        function continueOrFinishMultiplayer() {
+            const currentPlayer = gameState.localMultiplayer.currentPlayer;
+            
+            // Check if there are more players to play
+            if (currentPlayer + 1 < gameState.localMultiplayer.players.length) {
+                // Switch to next player
+                gameState.localMultiplayer.currentPlayer++;
+                showPlayerSwitchScreen();
+            } else {
+                // All players finished, show final results
+                showFinalMultiplayerResults();
+            }
         }
 
         // Handle game over
@@ -2423,12 +2469,136 @@
             elements.challengeTimerDisplay.style.display = 'none';
             elements.status.style.display = 'none';
             
+            // Handle local multiplayer scoring
+            if (gameState.localMultiplayer && gameState.localMultiplayer.isActive) {
+                handleLocalMultiplayerGameOver(title, message);
+                return;
+            }
+            
             // Keep quit button visible even during game over
             // elements.quitButton.style.display = 'block';
             
             elements.gameOverTitle.textContent = title;
             elements.gameOverText.textContent = message;
             elements.gameOver.style.display = 'block';
+        }
+
+        // Handle local multiplayer game over
+        function handleLocalMultiplayerGameOver(title, message) {
+            const currentPlayer = gameState.localMultiplayer.currentPlayer;
+            const currentPlayerName = gameState.localMultiplayer.players[currentPlayer];
+            
+            // Record current player's score (rounds completed)
+            gameState.localMultiplayer.scores[currentPlayer] = gameState.round - 1;
+            
+            // Check if there are more players to play
+            if (currentPlayer + 1 < gameState.localMultiplayer.players.length) {
+                // Switch to next player
+                gameState.localMultiplayer.currentPlayer++;
+                showPlayerSwitchScreen();
+            } else {
+                // All players finished, show final results
+                showFinalMultiplayerResults();
+            }
+        }
+
+        // Show player switch screen
+        function showPlayerSwitchScreen() {
+            const nextPlayer = gameState.localMultiplayer.players[gameState.localMultiplayer.currentPlayer];
+            elements.gameOverTitle.textContent = "🔄 Player Switch";
+            elements.gameOverText.innerHTML = `
+                <div style="text-align: center;">
+                    <p>Get ready for the next player!</p>
+                    <h3 style="color: #00ff00;">👤 ${nextPlayer}'s Turn</h3>
+                    <button onclick="continueToNextPlayer()" class="level-btn beginner-btn" style="margin-top: 20px;">
+                        🚀 Start Playing
+                    </button>
+                </div>
+            `;
+            elements.gameOver.style.display = 'block';
+        }
+
+        // Continue to next player
+        function continueToNextPlayer() {
+            elements.gameOver.style.display = 'none';
+            // Reset game state for next player
+            gameState.round = 1;
+            gameState.gameRunning = false;
+            gameState.glassBridgeIndex = 0;
+            gameState.bridgePattern = [];
+            
+            // Update player indicator
+            showCurrentPlayerIndicator();
+            
+            // Start fresh game
+            startGame();
+        }
+
+        // Show final multiplayer results
+        function showFinalMultiplayerResults() {
+            let resultsHTML = '<div style="text-align: center;"><h2>🏆 Final Results</h2>';
+            
+            // Create results array with player names and scores
+            const results = gameState.localMultiplayer.players.map((name, index) => ({
+                name: name,
+                score: gameState.localMultiplayer.scores[index]
+            }));
+            
+            // Sort by score (highest first)
+            results.sort((a, b) => b.score - a.score);
+            
+            // Display results
+            results.forEach((player, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                const place = index + 1;
+                resultsHTML += `
+                    <div style="margin: 10px 0; padding: 10px; border-radius: 5px; background: rgba(0,255,0,0.1);">
+                        <span style="font-size: 24px;">${medal}</span>
+                        <strong>${place}. ${player.name}</strong> - 
+                        <span style="color: #00ff00;">${player.score} rounds completed</span>
+                    </div>
+                `;
+            });
+            
+            resultsHTML += `
+                <button onclick="restartLocalMultiplayer()" class="level-btn beginner-btn" style="margin: 10px;">
+                    🔄 Play Again
+                </button>
+                <button onclick="resetToMainMenu()" class="level-btn advanced-btn" style="margin: 10px;">
+                    🏠 Main Menu
+                </button>
+            </div>`;
+            
+            elements.gameOverTitle.textContent = "🎮 Game Complete!";
+            elements.gameOverText.innerHTML = resultsHTML;
+            elements.gameOver.style.display = 'block';
+        }
+
+        // Restart local multiplayer
+        function restartLocalMultiplayer() {
+            // Reset all scores
+            gameState.localMultiplayer.scores.fill(0);
+            gameState.localMultiplayer.currentPlayer = 0;
+            
+            elements.gameOver.style.display = 'none';
+            showCurrentPlayerIndicator();
+            startGame();
+        }
+
+        // Reset to main menu
+        function resetToMainMenu() {
+            // Clean up local multiplayer
+            gameState.localMultiplayer = null;
+            gameState.isMultiplayer = false;
+            
+            // Remove player indicator
+            const indicator = document.getElementById('currentPlayerIndicator');
+            if (indicator) indicator.remove();
+            
+            // Reset to main menu
+            resetGameState();
+            elements.gameOver.style.display = 'none';
+            elements.gameModeSelector.style.display = 'block';
         }
 
         // Show status message
@@ -2606,7 +2776,7 @@
             startGame();
         }
 
-        // Join multiplayer room (simplified - no room IDs needed)
+        // Local multiplayer setup (same device)
         function joinMultiplayerRoom() {
             const playerName = elements.playerNameInput.value.trim();
             const difficulty = elements.multiplayerDifficulty.value;
@@ -2621,14 +2791,124 @@
                 return;
             }
             
-            gameState.difficulty = difficulty;
-            // Auto-join default lobby (no room ID needed)
-            multiplayerHandler.joinRoom(playerName, 'main-lobby', difficulty);
+            // Initialize local multiplayer
+            setupLocalMultiplayer(playerName, difficulty);
         }
 
-        // Start multiplayer game
+        // Local multiplayer setup for same device
+        function setupLocalMultiplayer(player1Name, difficulty) {
+            // Store first player
+            if (!gameState.localMultiplayer) {
+                gameState.localMultiplayer = {
+                    players: [],
+                    currentPlayer: 0,
+                    scores: [],
+                    isActive: true
+                };
+            }
+            
+            gameState.localMultiplayer.players.push(player1Name);
+            gameState.localMultiplayer.scores.push(0);
+            gameState.difficulty = difficulty;
+            gameState.isMultiplayer = true;
+            
+            // Update UI to show player joined
+            elements.joinRoomBtn.textContent = '✅ IN LOBBY';
+            elements.joinRoomBtn.disabled = true;
+            
+            // Check if we need a second player
+            if (gameState.localMultiplayer.players.length === 1) {
+                // Show option to add second player or start with one
+                showSecondPlayerOption();
+            } else {
+                // Both players ready, start game
+                startLocalMultiplayerGame();
+            }
+        }
+
+        // Show option for second player
+        function showSecondPlayerOption() {
+            elements.roomInfo.style.display = 'block';
+            elements.roomInfo.innerHTML = `
+                <div style="color: #00ff00; margin: 10px 0;">
+                    <h3>🎮 Player 1 Ready: ${gameState.localMultiplayer.players[0]}</h3>
+                    <p>Add a second player or start playing solo:</p>
+                    <input type="text" id="player2NameInput" placeholder="Player 2 Name (optional)" 
+                           style="padding: 10px; margin: 10px 0; width: 200px; border-radius: 5px; background: rgba(0,0,0,0.8); color: white; border: 2px solid #00ff00;">
+                    <br>
+                    <button onclick="addSecondPlayer()" class="level-btn beginner-btn" style="margin: 5px;">
+                        👥 Add Player 2
+                    </button>
+                    <button onclick="startLocalMultiplayerGame()" class="level-btn advanced-btn" style="margin: 5px;">
+                        🚀 Start Solo
+                    </button>
+                </div>
+            `;
+        }
+
+        // Add second player
+        function addSecondPlayer() {
+            const player2Name = document.getElementById('player2NameInput').value.trim();
+            if (!player2Name) {
+                alert('Please enter Player 2 name!');
+                return;
+            }
+            if (player2Name === gameState.localMultiplayer.players[0]) {
+                alert('Player 2 must have a different name!');
+                return;
+            }
+            
+            gameState.localMultiplayer.players.push(player2Name);
+            gameState.localMultiplayer.scores.push(0);
+            startLocalMultiplayerGame();
+        }
+
+        // Start local multiplayer game
+        function startLocalMultiplayerGame() {
+            elements.multiplayerSetup.style.display = 'none';
+            elements.roomInfo.style.display = 'none';
+            
+            // Show current player indicator
+            showCurrentPlayerIndicator();
+            
+            // Start the game
+            startGame();
+        }
+
+        // Show current player indicator
+        function showCurrentPlayerIndicator() {
+            const indicator = document.createElement('div');
+            indicator.id = 'currentPlayerIndicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 120px;
+                left: 20px;
+                background: rgba(0, 255, 0, 0.9);
+                color: black;
+                padding: 10px 15px;
+                border-radius: 10px;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            `;
+            
+            const currentPlayerName = gameState.localMultiplayer.players[gameState.localMultiplayer.currentPlayer];
+            indicator.textContent = `👤 Current Player: ${currentPlayerName}`;
+            
+            // Remove existing indicator
+            const existing = document.getElementById('currentPlayerIndicator');
+            if (existing) existing.remove();
+            
+            document.body.appendChild(indicator);
+        }
+
+        // Start multiplayer game (keep for compatibility)
         function startMultiplayerGame() {
-            multiplayerHandler.startGame();
+            if (gameState.localMultiplayer && gameState.localMultiplayer.isActive) {
+                startLocalMultiplayerGame();
+            } else {
+                multiplayerHandler.startGame();
+            }
         }
 
         // Back to mode selection
