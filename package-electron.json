@@ -1,0 +1,51 @@
+{
+  "name": "squid-game-math-challenge",
+  "version": "1.0.0",
+  "description": "Squid Game Math Challenge - Educational game for kids",
+  "main": "electron-main.js",
+  "author": "Samyuktha, Anantiyaa & Elaine",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux",
+    "dist": "electron-builder --publish=never"
+  },
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "build": {
+    "appId": "com.samyuktha.squidgamemath",
+    "productName": "Squid Game Math Challenge",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules",
+      "!dist",
+      "!*.md"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

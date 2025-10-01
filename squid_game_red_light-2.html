@@ -1,0 +1,3381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Light Green Light - Squid Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 50%, #90EE90 100%);
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 50px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            background: repeating-linear-gradient(
+                45deg,
+                #ff0000,
+                #ff0000 10px,
+                #ffffff 10px,
+                #ffffff 20px
+            );
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .doll {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 200px;
+            transition: transform 1s ease-in-out;
+        }
+
+        .doll.turned-back {
+            transform: translate(-50%, -50%) scaleX(-1);
+        }
+
+        .doll-body {
+            width: 80px;
+            height: 120px;
+            background: #ffb6c1;
+            border-radius: 40px;
+            position: relative;
+            margin: 0 auto;
+            border: 3px solid #ff69b4;
+        }
+
+        .doll-head {
+            width: 60px;
+            height: 60px;
+            background: #ffb6c1;
+            border-radius: 50%;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #ff69b4;
+        }
+
+        .doll-eyes {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 10px;
+        }
+
+        .doll-eye {
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+        }
+
+        .doll-eye.left { left: 8px; }
+        .doll-eye.right { right: 8px; }
+
+        .doll-mouth {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid #000;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .player {
+            position: absolute;
+            bottom: 100px;
+            left: 50px;
+            width: 40px;
+            height: 60px;
+            transition: left 2s ease-in-out;
+        }
+
+        .player-body {
+            width: 20px;
+            height: 35px;
+            background: #4CAF50;
+            border-radius: 10px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .player-head {
+            width: 15px;
+            height: 15px;
+            background: #ffdbac;
+            border-radius: 50%;
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .player-legs {
+            width: 25px;
+            height: 20px;
+            background: #2196F3;
+            border-radius: 0 0 10px 10px;
+            margin: 0 auto;
+            margin-top: 5px;
+        }
+
+        .math-challenge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
+            z-index: 1500;
+        }
+
+        .math-challenge h2 {
+            color: #ff4444;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .equation {
+            font-size: 28px;
+            margin: 20px 0;
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .answer-input {
+            padding: 15px;
+            font-size: 20px;
+            border: 3px solid #ff4444;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            width: 200px;
+            background: #333;
+            color: white;
+        }
+
+        .submit-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #cc2222;
+        }
+
+        .progress {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #ff0000;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+            z-index: 2001;
+        }
+
+        .game-over h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .victory {
+            background: rgba(0, 50, 0, 0.95);
+            color: #00ff00;
+            border-color: #00ff00;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            background: #45a049;
+        }
+
+        .status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 3px solid #ff0000;
+        }
+
+        .green-light {
+            color: #00ff00 !important;
+        }
+
+        .level-selector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+            z-index: 1002;
+        }
+
+        .multiplayer-setup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+            z-index: 1003;
+            display: none;
+        }
+
+        .multiplayer-setup h1 {
+            color: #00ff00;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .multiplayer-setup input {
+            padding: 12px;
+            margin: 10px;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .multiplayer-setup input::placeholder {
+            color: #888;
+        }
+
+        .room-info {
+            background: rgba(0, 50, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #00ff00;
+        }
+
+        .leaderboard {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #ffff00;
+            min-width: 250px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .leaderboard h3 {
+            color: #ffff00;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+            font-size: 14px;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-item.me {
+            background: rgba(0, 255, 0, 0.2);
+            padding: 8px;
+            border-radius: 5px;
+            border-bottom: 1px solid #00ff00;
+        }
+
+        .ghost-players {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .ghost-player {
+            position: absolute;
+            bottom: 100px;
+            width: 30px;
+            height: 50px;
+            opacity: 0.6;
+            transition: left 2s ease-in-out;
+        }
+
+        .ghost-player-body {
+            width: 15px;
+            height: 30px;
+            background: #888;
+            border-radius: 8px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .ghost-player-head {
+            width: 12px;
+            height: 12px;
+            background: #aaa;
+            border-radius: 50%;
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ghost-player-legs {
+            width: 20px;
+            height: 15px;
+            background: #666;
+            border-radius: 0 0 8px 8px;
+            margin: 0 auto;
+            margin-top: 3px;
+        }
+
+        .ghost-player.eliminated {
+            opacity: 0.2;
+            filter: grayscale(100%);
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            border: 2px solid #666;
+        }
+
+        .connection-status.connected {
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .connection-status.disconnected {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .game-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 1010;
+            width: 100%;
+        }
+
+        .game-title h1 {
+            font-size: 48px;
+            color: #ff0000;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .game-title .tagline {
+            font-size: 18px;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 0;
+            font-style: italic;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 20px;
+            border-radius: 15px;
+            border: 2px solid #ff0000;
+            display: inline-block;
+        }
+
+        .game-title .developer-credit {
+            font-size: 14px;
+            color: #000000;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-style: italic;
+            text-shadow: none;
+            opacity: 0.9;
+            display: block;
+            text-align: center;
+            clear: both;
+        }
+
+        .main-game-selector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+            border: 3px solid #ffd700;
+            z-index: 999;
+            min-width: 500px;
+        }
+
+        .main-game-selector h1 {
+            color: #ffd700;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            font-size: 24px;
+        }
+
+        .main-game-selector p {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .game-select-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(45deg, #1a1a1a, #333333);
+            color: white;
+            border: 2px solid #666;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .red-light-btn:hover {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .glass-bridge-btn:hover {
+            background: linear-gradient(45deg, #4444ff, #0000cc);
+            border-color: #0066ff;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .game-mode-selector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+            z-index: 1000;
+            margin-top: 80px;
+        }
+
+        .game-mode-selector h1 {
+            color: #ff4444;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .mode-btn {
+            padding: 20px 40px;
+            font-size: 18px;
+            margin: 15px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+
+        .single-player-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .single-player-btn:hover {
+            background: #1976D2;
+            transform: scale(1.05);
+        }
+
+        .multiplayer-btn {
+            background: #ff4444;
+            color: white;
+        }
+
+        .multiplayer-btn:hover {
+            background: #cc2222;
+            transform: scale(1.05);
+        }
+
+        .level-selector h1 {
+            color: #ff4444;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .level-selector p {
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: #cccccc;
+        }
+
+        .level-btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .beginner-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .beginner-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .advanced-btn {
+            background: #ff4444;
+            color: white;
+        }
+
+        .advanced-btn:hover {
+            background: #cc2222;
+            transform: scale(1.05);
+        }
+
+        .challenge-timer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #ff0000;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ff0000;
+            display: none;
+            z-index: 1001;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        .audio-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1003;
+        }
+
+        .audio-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #fff;
+            color: white;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .audio-btn.muted {
+            background: rgba(255, 0, 0, 0.8);
+        }
+
+        .quit-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 0, 0, 0.9);
+            border: 2px solid #ff0000;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1005;
+            display: none;
+            transition: all 0.3s;
+        }
+
+        .quit-button:hover {
+            background: rgba(255, 0, 0, 1);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+        }
+
+        .audio-notice {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 165, 0, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid #ff8c00;
+            box-shadow: 0 0 30px rgba(255, 165, 0, 0.7);
+            z-index: 1004;
+            display: none;
+        }
+
+        .audio-notice h3 {
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .enable-audio-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .enable-audio-btn:hover {
+            background: #45a049;
+        }
+
+        /* Glass Bridge Game Styles */
+        .glass-bridge-game {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #001122, #003366);
+            z-index: 100;
+        }
+
+        .bridge-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bridge-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: white;
+            z-index: 200;
+        }
+
+        .bridge-title h1 {
+            font-size: 32px;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: #00ccff;
+        }
+
+        .bridge-progress {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 200;
+        }
+
+        .bridge-visual {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 200px;
+            background: linear-gradient(to right, #444, #666);
+            border: 3px solid #888;
+            border-radius: 10px;
+            perspective: 800px;
+            z-index: 150;
+        }
+
+        .bridge-step {
+            position: absolute;
+            width: 50px;
+            height: 150px;
+            background: rgba(200, 200, 255, 0.3);
+            border: 2px solid #aaa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bridge-step.completed {
+            background: rgba(0, 255, 0, 0.5);
+            border-color: #00ff00;
+        }
+
+        .bridge-step.current {
+            background: rgba(255, 255, 0, 0.5);
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.7);
+        }
+
+        .bridge-challenge {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #00ccff;
+            text-align: center;
+            min-width: 500px;
+            z-index: 200;
+        }
+
+        .bridge-challenge h2 {
+            color: #00ccff;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .bridge-equation {
+            font-size: 28px;
+            color: white;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .glass-panels {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .glass-panel {
+            width: 150px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        .glass-panel:hover {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4));
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .panel-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .panel-answer {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .bridge-timer {
+            color: #ffff00;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .bridge-player {
+            position: absolute;
+            top: 290px; /* Position on top of bridge (bridge bottom at 350px - player height 60px = 290px) */
+            left: 50px;
+            width: 30px;
+            height: 60px;
+            z-index: 180;
+            transition: all 1s ease;
+        }
+
+        .bridge-player-head {
+            width: 20px;
+            height: 20px;
+            background: #ffdbac;
+            border-radius: 50%;
+            margin: 0 auto 5px;
+            border: 2px solid #333;
+        }
+
+        .bridge-player-body {
+            width: 30px;
+            height: 35px;
+            background: #ff0000;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+
+        .glass-break-animation {
+            animation: glassShattering 0.5s ease-out;
+        }
+
+        @keyframes glassShattering {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(5deg); opacity: 0.7; }
+            100% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="finish-line"></div>
+        
+        <div class="doll" id="doll">
+            <div class="doll-head">
+                <div class="doll-eyes">
+                    <div class="doll-eye left"></div>
+                    <div class="doll-eye right"></div>
+                </div>
+                <div class="doll-mouth"></div>
+            </div>
+            <div class="doll-body"></div>
+        </div>
+
+        <div class="player" id="player">
+            <div class="player-head"></div>
+            <div class="player-body"></div>
+            <div class="player-legs"></div>
+        </div>
+
+        <div class="challenge-timer" id="challengeTimerDisplay">Time: 75s</div>
+        <div class="progress" id="progress">Round: 1/5</div>
+        <div class="status" id="status">GREEN LIGHT!</div>
+        <button class="quit-button" id="quitButton">❌ QUIT GAME</button>
+
+        <div class="game-title" id="gameTitle">
+            <h1>🎮 SQUID GAME MATH CHALLENGE 🎮</h1>
+            <p class="tagline">Choose your exciting math game adventure!</p>
+            <p class="developer-credit">Concept and developed by Samyuktha, Anantiyaa & Elaine</p>
+        </div>
+
+        <div class="main-game-selector" id="mainGameSelector">
+            <h1>🎯 SELECT YOUR GAME</h1>
+            <p>Choose which Squid Game challenge you want to face!</p>
+            <button class="game-select-btn red-light-btn" id="redLightGameBtn">
+                🔴 RED LIGHT GREEN LIGHT 🟢<br>
+                <small style="font-size: 12px;">Solve math equations while the doll watches</small>
+            </button>
+            <button class="game-select-btn glass-bridge-btn" id="glassBridgeGameBtn">
+                🌉 GLASS BRIDGE CHALLENGE 🌉<br>
+                <small style="font-size: 12px;">Choose the correct answer to cross safely</small>
+            </button>
+        </div>
+
+        <div class="game-mode-selector" id="gameModeSelector" style="display: none;">
+            <h1>🎮 SELECT GAME MODE</h1>
+            <p id="gameModeDescription">Choose how you want to play Red Light Green Light!</p>
+            <button class="mode-btn single-player-btn" id="singlePlayerBtn">
+                👤 SINGLE PLAYER<br>
+                <small style="font-size: 14px;">Play alone against the clock</small>
+            </button>
+            <button class="mode-btn multiplayer-btn" id="multiplayerBtn">
+                👥 MULTIPLAYER<br>
+                <small style="font-size: 14px;">Compete with other players</small>
+            </button>
+        </div>
+
+        <div class="level-selector" id="levelSelector" style="display: none;">
+            <h1>🎯 SELECT DIFFICULTY LEVEL</h1>
+            <p>Choose your math challenge level for Red Light Green Light!</p>
+            <button class="level-btn beginner-btn" id="beginnerBtn">
+                📚 BEGINNER<br>
+                <small style="font-size: 14px;">Linear Equations (2x + 5 = 13)</small>
+            </button>
+            <button class="level-btn advanced-btn" id="advancedBtn">
+                🔥 ADVANCED<br>
+                <small style="font-size: 14px;">Quadratic Equations (x² - 5x + 6 = 0)</small>
+            </button>
+        </div>
+
+        <div class="multiplayer-setup" id="multiplayerSetup">
+            <h1>🌐 MULTIPLAYER SETUP</h1>
+            <p>Enter your details to join the competition!</p>
+            
+            <div style="margin: 20px 0;">
+                <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <input type="text" id="roomIdInput" placeholder="Room ID (leave empty for new room)" maxlength="10">
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label style="color: #cccccc; margin-right: 15px;">Difficulty:</label>
+                <select id="multiplayerDifficulty" style="padding: 8px; border-radius: 5px; background: rgba(0,0,0,0.8); color: white; border: 2px solid #00ff00;">
+                    <option value="beginner">📚 Beginner</option>
+                    <option value="advanced">🔥 Advanced</option>
+                </select>
+            </div>
+            
+            <div class="room-info" id="roomInfo" style="display: none;">
+                <strong>Room: <span id="currentRoomId"></span></strong><br>
+                <span id="playerCount">Players: 0</span>
+            </div>
+            
+            <button class="level-btn beginner-btn" id="joinRoomBtn">🚀 JOIN GAME</button>
+            <button class="level-btn advanced-btn" id="startMultiplayerBtn" style="display: none;">▶️ START GAME</button>
+            <button class="level-btn" id="backToModeBtn" style="background: #666; margin-top: 15px;">← BACK</button>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            🔴 Disconnected
+        </div>
+
+        <div class="leaderboard" id="leaderboard">
+            <h3>🏆 LEADERBOARD</h3>
+            <div id="leaderboardContent">
+                <div class="leaderboard-item">
+                    <span>Waiting for players...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ghost-players" id="ghostPlayers">
+            <!-- Ghost players will be dynamically added here -->
+        </div>
+
+        <div class="audio-controls">
+            <button class="audio-btn" id="muteBtn">🔊 Sound ON</button>
+            <button class="audio-btn" id="volumeBtn">🎵 Music</button>
+        </div>
+
+        <div class="audio-notice" id="audioNotice">
+            <h3>🎵 Enable Audio for Full Experience!</h3>
+            <p>Click below to unlock background music and sound effects</p>
+            <button class="enable-audio-btn" id="enableAudioBtn">🔊 ENABLE AUDIO</button>
+            <br><small style="margin-top: 10px; display: block; color: #ddd;">
+                You can always control audio with the buttons in the bottom left
+            </small>
+        </div>
+
+        <div class="math-challenge" id="mathChallenge">
+            <h2>🚨 SOLVE THE EQUATION! 🚨</h2>
+            <div class="equation" id="equation"></div>
+            <input type="number" class="answer-input" id="answerInput" placeholder="Enter your answer">
+            <br>
+            <button class="submit-btn" id="submitBtn">SUBMIT ANSWER</button>
+            <div style="margin-top: 15px; color: #ffff00;">
+                Solve quickly before time runs out!
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h1 id="gameOverTitle">CHALLENGE COMPLETE!</h1>
+            <p id="gameOverText">The doll spotted you moving!</p>
+            <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
+        </div>
+
+        <!-- Glass Bridge Game Elements -->
+        <div class="glass-bridge-game" id="glassBridgeGame" style="display: none;">
+            <div class="bridge-container" id="bridgeContainer">
+                <div class="bridge-title">
+                    <h1>🌉 GLASS BRIDGE CHALLENGE 🌉</h1>
+                    <p>Choose the correct math answer to step on the safe glass!</p>
+                </div>
+                
+                <div class="bridge-progress">
+                    <span id="bridgeStepCounter">Step 1 of 10</span>
+                    <span id="bridgeLives">❤️ Lives: 3</span>
+                </div>
+                
+                <div class="bridge-visual" id="bridgeVisual">
+                    <!-- Bridge steps will be generated dynamically -->
+                </div>
+                
+                <div class="bridge-challenge" id="bridgeChallenge">
+                    <h2>🧮 SOLVE TO CROSS SAFELY 🧮</h2>
+                    <div class="bridge-equation" id="bridgeEquation"></div>
+                    <div class="glass-panels">
+                        <button class="glass-panel left-panel" id="leftPanel">
+                            <span class="panel-label">LEFT</span>
+                            <span class="panel-answer" id="leftAnswer"></span>
+                        </button>
+                        <button class="glass-panel right-panel" id="rightPanel">
+                            <span class="panel-label">RIGHT</span>
+                            <span class="panel-answer" id="rightAnswer"></span>
+                        </button>
+                    </div>
+                    <div class="bridge-timer" id="bridgeTimer">Time: 60s</div>
+                </div>
+            </div>
+            
+            <div class="bridge-player" id="bridgePlayer">
+                <div class="bridge-player-head"></div>
+                <div class="bridge-player-body"></div>
+            </div>
+        </div>
+
+        <!-- Audio Elements -->
+        <audio id="bgMusic" loop>
+            <source src="assets/Background_music_Squid.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="introSound" preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/bell_ring.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="hardBeatSound" loop preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/door_bump.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="tickSound" preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/tap.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="successSound" preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/button_tiny.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="failureSound" preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/button_push.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="alertSound" preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/door_bump.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="victorySound" preload="auto">
+            <source src="https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/water_droplet_3.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script>
+        // Game state variables
+        let gameState = {
+            round: 1,
+            maxRounds: 5,
+            timeLeft: 75,
+            playerPosition: 50,
+            movementPerRound: 0, // Will be calculated dynamically
+            gameRunning: false,
+            difficulty: null,
+            currentEquation: { solutions: [] },
+            challengeTimer: null,
+            audioEnabled: true,
+            musicEnabled: true,
+            tickerInterval: null,
+            gameMode: null, // 'single' or 'multiplayer'
+            isMultiplayer: false,
+            currentGame: null // 'redlight' or 'glassbridge'
+        };
+
+        // Glass Bridge game state
+        let glassBridgeState = {
+            currentStep: 1,
+            totalSteps: 10,
+            lives: 3,
+            playerPosition: 0,
+            timeLeft: 60,
+            currentEquation: null,
+            correctAnswer: null,
+            bridgeTimer: null,
+            bridgeSteps: [],
+            gameRunning: false
+        };
+
+        // Multiplayer state
+        let multiplayerState = {
+            websocket: null,
+            playerId: null,
+            roomId: null,
+            playerName: '',
+            otherPlayers: new Map(),
+            leaderboard: [],
+            connectionStatus: 'disconnected',
+            phaseStartTime: null
+        };
+
+        // DOM elements
+        const elements = {};
+
+        // Multiplayer WebSocket handler
+        class MultiplayerHandler {
+            constructor() {
+                this.websocket = null;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+            }
+
+            connect() {
+                try {
+                    // Try to connect to the multiplayer server
+                    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const wsHost = window.location.hostname === 'localhost' ? 'localhost:3001' : window.location.host;
+                    this.websocket = new WebSocket(`${wsProtocol}//${wsHost}`);
+                    
+                    this.websocket.onopen = () => {
+                        console.log('Connected to multiplayer server');
+                        multiplayerState.connectionStatus = 'connected';
+                        this.updateConnectionStatus();
+                        this.reconnectAttempts = 0;
+                    };
+                    
+                    this.websocket.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        this.handleMessage(data);
+                    };
+                    
+                    this.websocket.onclose = () => {
+                        console.log('Disconnected from multiplayer server');
+                        multiplayerState.connectionStatus = 'disconnected';
+                        this.updateConnectionStatus();
+                        this.attemptReconnect();
+                    };
+                    
+                    this.websocket.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        multiplayerState.connectionStatus = 'error';
+                        this.updateConnectionStatus();
+                    };
+                    
+                } catch (error) {
+                    console.error('Failed to connect to multiplayer server:', error);
+                    multiplayerState.connectionStatus = 'error';
+                    this.updateConnectionStatus();
+                }
+            }
+
+            attemptReconnect() {
+                if (this.reconnectAttempts < this.maxReconnectAttempts && gameState.isMultiplayer) {
+                    this.reconnectAttempts++;
+                    console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                    setTimeout(() => {
+                        this.connect();
+                    }, 2000 * this.reconnectAttempts);
+                }
+            }
+
+            updateConnectionStatus() {
+                const statusEl = elements.connectionStatus;
+                if (!statusEl) return;
+                
+                statusEl.className = `connection-status ${multiplayerState.connectionStatus}`;
+                
+                switch (multiplayerState.connectionStatus) {
+                    case 'connected':
+                        statusEl.textContent = '🟢 Connected';
+                        break;
+                    case 'disconnected':
+                        statusEl.textContent = '🔴 Disconnected';
+                        break;
+                    case 'error':
+                        statusEl.textContent = '⚠️ Connection Error';
+                        break;
+                }
+            }
+
+            send(data) {
+                if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify(data));
+                }
+            }
+
+            handleMessage(data) {
+                switch (data.type) {
+                    case 'joined_room':
+                        this.handleJoinedRoom(data);
+                        break;
+                    case 'player_joined':
+                        this.handlePlayerJoined(data);
+                        break;
+                    case 'player_left':
+                        this.handlePlayerLeft(data);
+                        break;
+                    case 'game_started':
+                        this.handleGameStarted(data);
+                        break;
+                    case 'phase_change':
+                        this.handlePhaseChange(data);
+                        break;
+                    case 'player_solved':
+                        this.handlePlayerSolved(data);
+                        break;
+                    case 'player_eliminated':
+                        this.handlePlayerEliminated(data);
+                        break;
+                    case 'leaderboard_update':
+                        this.handleLeaderboardUpdate(data);
+                        break;
+                    case 'game_ended':
+                        this.handleGameEnded(data);
+                        break;
+                }
+            }
+
+            handleJoinedRoom(data) {
+                multiplayerState.playerId = data.playerId;
+                multiplayerState.roomId = data.roomId;
+                
+                elements.currentRoomId.textContent = data.roomId;
+                elements.roomInfo.style.display = 'block';
+                elements.startMultiplayerBtn.style.display = 'block';
+                elements.joinRoomBtn.textContent = '✅ JOINED';
+                elements.joinRoomBtn.disabled = true;
+                
+                // Update player count
+                this.updatePlayerCount(data.gameState.players.length);
+                
+                // Show leaderboard
+                elements.leaderboard.style.display = 'block';
+            }
+
+            handlePlayerJoined(data) {
+                this.updatePlayerCount(data.totalPlayers);
+                audioSystem.playSound('successSound');
+            }
+
+            handlePlayerLeft(data) {
+                this.updatePlayerCount(data.totalPlayers);
+                this.removeGhostPlayer(data.playerId);
+            }
+
+            handleGameStarted(data) {
+                elements.multiplayerSetup.style.display = 'none';
+                gameState.gameRunning = true;
+                gameState.isMultiplayer = true;
+                startGame();
+            }
+
+            handlePhaseChange(data) {
+                multiplayerState.phaseStartTime = Date.now();
+                
+                if (data.phase === 'green') {
+                    elements.doll.classList.remove('turned-back');
+                    showStatus(data.message, true);
+                } else if (data.phase === 'red') {
+                    elements.doll.classList.add('turned-back');
+                    audioSystem.playSound('alertSound');
+                    showStatus(data.message, false);
+                    showMultiplayerMathChallenge(data.equation, data.timeLimit);
+                }
+            }
+
+            handlePlayerSolved(data) {
+                audioSystem.playSound('successSound');
+                this.updateGhostPlayer(data.playerId, data.newPosition);
+            }
+
+            handlePlayerEliminated(data) {
+                audioSystem.playSound('failureSound');
+                
+                if (data.playerId === multiplayerState.playerId) {
+                    // Current player was eliminated
+                    gameOver(
+                        data.reason === 'timeout' ? 'TIME UP!' : 'WRONG ANSWER!',
+                        data.reason === 'timeout' ? 
+                            'You failed to solve the equation in time!' : 
+                            `Incorrect! Solutions were: ${data.correctAnswers?.join(' and ')}`
+                    );
+                } else {
+                    this.eliminateGhostPlayer(data.playerId);
+                }
+            }
+
+            handleLeaderboardUpdate(data) {
+                this.updateLeaderboard(data.leaderboard);
+            }
+
+            handleGameEnded(data) {
+                gameState.gameRunning = false;
+                
+                // Check if current player won
+                const myRank = data.finalLeaderboard.find(p => p.id === multiplayerState.playerId);
+                if (myRank && myRank.rank === 1) {
+                    victory();
+                } else {
+                    gameOver('GAME COMPLETE!', `You finished rank #${myRank?.rank || 'participated'}`);
+                }
+            }
+
+            updatePlayerCount(count) {
+                elements.playerCount.textContent = `Players: ${count}`;
+            }
+
+            updateLeaderboard(leaderboard) {
+                multiplayerState.leaderboard = leaderboard;
+                const content = elements.leaderboardContent;
+                
+                if (leaderboard.length === 0) {
+                    content.innerHTML = '<div class="leaderboard-item"><span>Waiting for players...</span></div>';
+                    return;
+                }
+                
+                content.innerHTML = leaderboard.map((player, index) => {
+                    const isMe = player.id === multiplayerState.playerId;
+                    return `
+                        <div class="leaderboard-item ${isMe ? 'me' : ''}">
+                            <span>${index + 1}. ${player.name} ${isMe ? '(You)' : ''}</span>
+                            <span>${player.score}pts</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateGhostPlayer(playerId, position) {
+                let ghostEl = document.getElementById(`ghost-${playerId}`);
+                if (!ghostEl) {
+                    ghostEl = this.createGhostPlayer(playerId);
+                }
+                ghostEl.style.left = `${position}px`;
+            }
+
+            eliminateGhostPlayer(playerId) {
+                const ghostEl = document.getElementById(`ghost-${playerId}`);
+                if (ghostEl) {
+                    ghostEl.classList.add('eliminated');
+                }
+            }
+
+            removeGhostPlayer(playerId) {
+                const ghostEl = document.getElementById(`ghost-${playerId}`);
+                if (ghostEl) {
+                    ghostEl.remove();
+                }
+            }
+
+            createGhostPlayer(playerId) {
+                const ghostEl = document.createElement('div');
+                ghostEl.id = `ghost-${playerId}`;
+                ghostEl.className = 'ghost-player';
+                ghostEl.style.left = '50px';
+                
+                ghostEl.innerHTML = `
+                    <div class="ghost-player-head"></div>
+                    <div class="ghost-player-body"></div>
+                    <div class="ghost-player-legs"></div>
+                `;
+                
+                elements.ghostPlayers.appendChild(ghostEl);
+                return ghostEl;
+            }
+
+            joinRoom(playerName, roomId, difficulty) {
+                multiplayerState.playerName = playerName;
+                this.send({
+                    type: 'join_room',
+                    roomId: roomId || this.generateRoomId(),
+                    playerName: playerName,
+                    difficulty: difficulty
+                });
+            }
+
+            startGame() {
+                this.send({
+                    type: 'start_game'
+                });
+            }
+
+            submitAnswer(answer, solveTime) {
+                this.send({
+                    type: 'submit_answer',
+                    answer: answer,
+                    solveTime: solveTime
+                });
+            }
+
+            generateRoomId() {
+                return Math.random().toString(36).substr(2, 6).toUpperCase();
+            }
+        }
+
+        // Initialize multiplayer handler
+        const multiplayerHandler = new MultiplayerHandler();
+
+        // Audio system
+        const audioSystem = {
+            bgMusic: null,
+            tickSound: null,
+            successSound: null,
+            failureSound: null,
+            alertSound: null,
+            victorySound: null,
+            introSound: null,
+            hardBeatSound: null,
+            currentBgMusic: null,
+            musicTransitionTimer: null,
+            
+            init() {
+                this.bgMusic = document.getElementById('bgMusic');
+                this.tickSound = document.getElementById('tickSound');
+                this.successSound = document.getElementById('successSound');
+                this.failureSound = document.getElementById('failureSound');
+                this.alertSound = document.getElementById('alertSound');
+                this.victorySound = document.getElementById('victorySound');
+                this.introSound = document.getElementById('introSound');
+                this.hardBeatSound = document.getElementById('hardBeatSound');
+                
+                // Set volumes
+                if (this.bgMusic) this.bgMusic.volume = 0.15;
+                if (this.tickSound) this.tickSound.volume = 0.5;
+                if (this.successSound) this.successSound.volume = 0.7;
+                if (this.failureSound) this.failureSound.volume = 0.6;
+                if (this.alertSound) this.alertSound.volume = 0.8;
+                if (this.victorySound) this.victorySound.volume = 0.8;
+                if (this.introSound) this.introSound.volume = 0.4;
+                if (this.hardBeatSound) this.hardBeatSound.volume = 0.5;
+            },
+            
+            playSound(soundName) {
+                if (!gameState.audioEnabled) return;
+                
+                try {
+                    if (this[soundName] && typeof this[soundName].play === 'function') {
+                        // Reset sound to beginning for rapid plays
+                        this[soundName].currentTime = 0;
+                        this[soundName].play().catch(e => {
+                            console.log('Audio play prevented by browser policy');
+                        });
+                    }
+                } catch (error) {
+                    console.log('Audio error:', error);
+                }
+            },
+            
+            startBackgroundMusic() {
+                if (!gameState.musicEnabled) return;
+                
+                // Start with bell sound for 5 seconds, then transition to background music
+                this.startBellWithMusicTransition();
+            },
+
+            startBellWithMusicTransition() {
+                if (!gameState.musicEnabled) {
+                    console.log('Music disabled, skipping bell intro');
+                    return;
+                }
+                
+                if (!this.introSound) {
+                    console.log('Bell sound not available, playing background music directly');
+                    this.playRegularBgMusic();
+                    return;
+                }
+                
+                try {
+                    console.log('Starting with bell sound for 5 seconds...');
+                    // Stop any existing music
+                    this.stopAllMusic();
+                    
+                    // Play bell sound (intro)
+                    this.introSound.currentTime = 0;
+                    this.currentBgMusic = this.introSound;
+                    
+                    const playPromise = this.introSound.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Bell sound started successfully');
+                            
+                            // Set timer to transition to background music after 5 seconds
+                            this.musicTransitionTimer = setTimeout(() => {
+                                console.log('Transitioning to background music...');
+                                if (gameState.musicEnabled) {
+                                    this.transitionToBackgroundMusic();
+                                }
+                            }, 5000); // 5 seconds
+                            
+                        }).catch(error => {
+                            console.log('Bell sound prevented by browser policy:', error);
+                            this.showAudioNotice();
+                        });
+                    }
+                } catch (error) {
+                    console.log('Bell sound error:', error);
+                    // Fallback to background music
+                    this.playRegularBgMusic();
+                }
+            },
+
+            transitionToBackgroundMusic() {
+                if (!gameState.musicEnabled) return;
+                
+                console.log('Bell sound finished, starting background music...', this.bgMusic);
+                
+                try {
+                    // Stop bell sound immediately (no fade)
+                    if (this.introSound && !this.introSound.paused) {
+                        this.introSound.pause();
+                        this.introSound.currentTime = 0;
+                    }
+                    
+                    // Start background music immediately after bell stops
+                    this.playRegularBgMusic();
+                } catch (error) {
+                    console.log('Transition to background music error:', error);
+                }
+            },
+
+            startIntroWithTransition() {
+                if (!gameState.musicEnabled) {
+                    console.log('Music disabled, skipping intro');
+                    return;
+                }
+                
+                if (!this.introSound) {
+                    console.log('Intro sound not available, using fallback');
+                    this.createHeartBeatSound();
+                    return;
+                }
+                
+                try {
+                    console.log('Starting intro with transition...');
+                    // Stop any existing music
+                    this.stopAllMusic();
+                    
+                    // Play intro sound (bell)
+                    this.introSound.currentTime = 0;
+                    this.currentBgMusic = this.introSound;
+                    
+                    const playPromise = this.introSound.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Intro music started successfully');
+                            
+                            // Set timer to transition to hard beat after 4 seconds
+                            this.musicTransitionTimer = setTimeout(() => {
+                                console.log('Transitioning to heartbeat...');
+                                if (gameState.gameRunning) {
+                                    this.transitionToHardBeat();
+                                }
+                            }, 4000);
+                            
+                        }).catch(error => {
+                            console.log('Intro music prevented by browser policy:', error);
+                            this.showAudioNotice();
+                        });
+                    }
+                } catch (error) {
+                    console.log('Intro music error:', error);
+                    this.createHeartBeatSound(); // Fallback to heartbeat
+                }
+            },
+
+            transitionToHardBeat() {
+                if (!gameState.musicEnabled) return;
+                
+                console.log('Transitioning to hard beat...', this.hardBeatSound);
+                
+                try {
+                    // Fade out intro sound
+                    if (this.introSound && !this.introSound.paused) {
+                        this.fadeOutAudio(this.introSound, 500, () => {
+                            this.startHardBeat();
+                        });
+                    } else {
+                        // If intro sound is not playing, start hard beat immediately
+                        this.startHardBeat();
+                    }
+                } catch (error) {
+                    console.log('Transition to hard beat error:', error);
+                }
+            },
+
+            startHardBeat() {
+                if (!gameState.musicEnabled) return;
+                
+                try {
+                    // Use a more reliable hard beat sound - create a synthetic beat
+                    this.createHeartBeatSound();
+                } catch (error) {
+                    console.log('Start hard beat error:', error);
+                }
+            },
+
+            createHeartBeatSound() {
+                if (!gameState.musicEnabled) return;
+                
+                console.log('Using bell intro + background music transition');
+                
+                // Use bell intro with background music transition
+                this.startBellWithMusicTransition();
+            },
+
+            fallbackHeartBeat() {
+                // Use bell intro + background music transition instead of heartbeat
+                console.log('Using bell intro + background music transition');
+                this.startBellWithMusicTransition();
+            },
+
+            playRegularBgMusic() {
+                if (!gameState.musicEnabled || !this.bgMusic) return;
+                
+                try {
+                    this.bgMusic.currentTime = 0;
+                    this.currentBgMusic = this.bgMusic;
+                    const playPromise = this.bgMusic.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Background music started');
+                        }).catch(error => {
+                            console.log('Background music prevented by browser policy');
+                            this.showAudioNotice();
+                        });
+                    }
+                } catch (error) {
+                    console.log('Background music error:', error);
+                    this.showAudioNotice();
+                }
+            },
+
+            fadeOutAudio(audioElement, duration, callback) {
+                if (!audioElement || audioElement.paused) {
+                    if (callback) callback();
+                    return;
+                }
+
+                const originalVolume = audioElement.volume;
+                const fadeStep = originalVolume / (duration / 50);
+                
+                const fadeInterval = setInterval(() => {
+                    if (audioElement.volume > fadeStep) {
+                        audioElement.volume -= fadeStep;
+                    } else {
+                        audioElement.volume = 0;
+                        audioElement.pause();
+                        audioElement.volume = originalVolume; // Reset volume for next play
+                        clearInterval(fadeInterval);
+                        if (callback) callback();
+                    }
+                }, 50);
+            },
+
+            stopAllMusic() {
+                // Pause music without resetting currentTime (for resuming)
+                if (this.bgMusic) this.bgMusic.pause();
+                if (this.introSound) this.introSound.pause();
+                if (this.hardBeatSound) this.hardBeatSound.pause();
+                if (this.alertSound) this.alertSound.pause();
+                if (this.musicTransitionTimer) {
+                    clearTimeout(this.musicTransitionTimer);
+                    this.musicTransitionTimer = null;
+                }
+                // Don't set gameRunning to false here - let the game control its own state
+            },
+            
+            stopAllMusicCompletely() {
+                // Stop music and reset currentTime (for complete shutdown)
+                if (this.bgMusic) {
+                    this.bgMusic.pause();
+                    this.bgMusic.currentTime = 0;
+                }
+                if (this.introSound) {
+                    this.introSound.pause();
+                    this.introSound.currentTime = 0;
+                }
+                if (this.hardBeatSound) {
+                    this.hardBeatSound.pause();
+                    this.hardBeatSound.currentTime = 0;
+                }
+                if (this.alertSound) {
+                    this.alertSound.pause();
+                    this.alertSound.currentTime = 0;
+                }
+                if (this.musicTransitionTimer) {
+                    clearTimeout(this.musicTransitionTimer);
+                    this.musicTransitionTimer = null;
+                }
+                this.currentBgMusic = null;
+            },
+            
+            showAudioNotice() {
+                const notice = document.getElementById('audioNotice');
+                if (notice && !gameState.gameRunning) {
+                    notice.style.display = 'block';
+                }
+            },
+            
+            hideAudioNotice() {
+                const notice = document.getElementById('audioNotice');
+                if (notice) {
+                    notice.style.display = 'none';
+                }
+            },
+            
+            stopBackgroundMusic() {
+                this.stopAllMusicCompletely();
+            },
+            
+            pauseBackgroundMusic() {
+                if (this.currentBgMusic && !this.currentBgMusic.paused) {
+                    this.currentBgMusic.pause();
+                }
+                if (this.bgMusic && !this.bgMusic.paused) {
+                    this.bgMusic.pause();
+                }
+                if (this.introSound && !this.introSound.paused) {
+                    this.introSound.pause();
+                }
+                if (this.hardBeatSound && !this.hardBeatSound.paused) {
+                    this.hardBeatSound.pause();
+                }
+                if (this.musicTransitionTimer) {
+                    clearTimeout(this.musicTransitionTimer);
+                    this.musicTransitionTimer = null;
+                }
+            },
+            
+            hasMusicToResume() {
+                // Check if there's any paused music that can be resumed
+                return (this.currentBgMusic && this.currentBgMusic.paused) ||
+                       (this.bgMusic && this.bgMusic.paused && this.bgMusic.currentTime > 0) ||
+                       (this.introSound && this.introSound.paused && this.introSound.currentTime > 0);
+            },
+
+            resumeBackgroundMusic() {
+                // Check if any game is running (Red Light Green Light or Glass Bridge)
+                const isAnyGameRunning = gameState.gameRunning || glassBridgeState.gameRunning;
+                if (!gameState.musicEnabled || !isAnyGameRunning) return;
+                
+                try {
+                    // Resume the current background music if it was paused
+                    if (this.currentBgMusic && this.currentBgMusic.paused) {
+                        this.currentBgMusic.play().catch(e => console.log('Resume failed:', e));
+                        return;
+                    }
+                    
+                    // If no current music, check if bgMusic was paused
+                    if (this.bgMusic && this.bgMusic.paused && this.bgMusic.currentTime > 0) {
+                        this.currentBgMusic = this.bgMusic;
+                        this.bgMusic.play().catch(e => console.log('Resume bgMusic failed:', e));
+                        return;
+                    }
+                    
+                    // If intro sound was paused
+                    if (this.introSound && this.introSound.paused && this.introSound.currentTime > 0) {
+                        this.currentBgMusic = this.introSound;
+                        this.introSound.play().catch(e => console.log('Resume introSound failed:', e));
+                        return;
+                    }
+                    
+                    // If hard beat sound was paused
+                    if (this.hardBeatSound && this.hardBeatSound.paused && this.hardBeatSound.currentTime > 0) {
+                        this.currentBgMusic = this.hardBeatSound;
+                        this.hardBeatSound.play().catch(e => console.log('Resume hardBeatSound failed:', e));
+                        return;
+                    }
+                    
+                    // If nothing to resume, start fresh background music
+                    this.startBackgroundMusic();
+                } catch (error) {
+                    console.log('Resume background music error:', error);
+                }
+            },
+            
+            startTicker() {
+                this.stopTicker(); // Clear any existing ticker
+                
+                gameState.tickerInterval = setInterval(() => {
+                    if (gameState.timeLeft <= 10 && gameState.timeLeft > 0) {
+                        this.playSound('tickSound');
+                    }
+                }, 1000);
+            },
+            
+            stopTicker() {
+                if (gameState.tickerInterval) {
+                    clearInterval(gameState.tickerInterval);
+                    gameState.tickerInterval = null;
+                }
+            },
+            
+            stopAllSounds() {
+                // Stop all audio elements
+                if (this.bgMusic) {
+                    this.bgMusic.pause();
+                    this.bgMusic.currentTime = 0;
+                }
+                if (this.introSound) {
+                    this.introSound.pause();
+                    this.introSound.currentTime = 0;
+                }
+                if (this.hardBeatSound) {
+                    this.hardBeatSound.pause();
+                    this.hardBeatSound.currentTime = 0;
+                }
+                if (this.tickSound) {
+                    this.tickSound.pause();
+                    this.tickSound.currentTime = 0;
+                }
+                if (this.successSound) {
+                    this.successSound.pause();
+                    this.successSound.currentTime = 0;
+                }
+                if (this.failureSound) {
+                    this.failureSound.pause();
+                    this.failureSound.currentTime = 0;
+                }
+                if (this.alertSound) {
+                    this.alertSound.pause();
+                    this.alertSound.currentTime = 0;
+                }
+                if (this.victorySound) {
+                    this.victorySound.pause();
+                    this.victorySound.currentTime = 0;
+                }
+                
+                // Clear timers
+                if (this.musicTransitionTimer) {
+                    clearTimeout(this.musicTransitionTimer);
+                    this.musicTransitionTimer = null;
+                }
+                
+                // Stop ticker interval
+                this.stopTicker();
+                
+                this.currentBgMusic = null;
+            }
+        };
+
+        // Initialize DOM elements safely
+        function initElements() {
+            const ids = [
+                'doll', 'player', 'challengeTimerDisplay', 'progress', 'status',
+                'mathChallenge', 'equation', 'answerInput', 'gameOver', 
+                'gameOverTitle', 'gameOverText', 'levelSelector', 'beginnerBtn',
+                'advancedBtn', 'submitBtn', 'restartBtn', 'muteBtn', 'volumeBtn',
+                'audioNotice', 'enableAudioBtn', 'gameModeSelector', 'singlePlayerBtn',
+                'multiplayerBtn', 'multiplayerSetup', 'playerNameInput', 'roomIdInput',
+                'multiplayerDifficulty', 'joinRoomBtn', 'startMultiplayerBtn', 
+                'backToModeBtn', 'connectionStatus', 'leaderboard', 'leaderboardContent',
+                'ghostPlayers', 'roomInfo', 'currentRoomId', 'playerCount', 'quitButton',
+                'gameTitle', 'mainGameSelector', 'redLightGameBtn', 'glassBridgeGameBtn',
+                'glassBridgeGame', 'bridgeContainer', 'bridgeVisual', 'bridgeChallenge',
+                'bridgeEquation', 'leftPanel', 'rightPanel', 'leftAnswer', 'rightAnswer',
+                'bridgeStepCounter', 'bridgeLives', 'bridgeTimer', 'bridgePlayer', 'gameModeDescription'
+            ];
+            
+            ids.forEach(id => {
+                elements[id] = document.getElementById(id);
+            });
+        }
+
+        // Enable audio (called on user interaction)
+        function enableAudio() {
+            try {
+                console.log('Enabling audio...');
+                audioSystem.init();
+                audioSystem.hideAudioNotice();
+                
+                // Try to start background music
+                if (gameState.musicEnabled && gameState.gameRunning) {
+                    audioSystem.startBackgroundMusic();
+                }
+                
+                // Play a short test sound to "unlock" audio
+                audioSystem.playSound('tickSound');
+                console.log('Audio enabled successfully');
+            } catch (error) {
+                console.error('Error enabling audio:', error);
+            }
+        }
+
+        // Manual audio enable (from button click)
+        function manualEnableAudio() {
+            audioSystem.init();
+            audioSystem.hideAudioNotice();
+            
+            // Force start background music
+            if (gameState.musicEnabled) {
+                audioSystem.startBackgroundMusic();
+            }
+            
+            // Play test sound
+            audioSystem.playSound('successSound');
+        }
+
+        // Start the game
+        // Calculate movement per round based on viewport width
+        function calculateMovementPerRound() {
+            const viewportWidth = window.innerWidth;
+            const startPosition = 50; // Player starts at 50px from left
+            const finishLineOffset = 50; // Finish line is 50px from right
+            const finishLinePosition = viewportWidth - finishLineOffset;
+            const totalDistance = finishLinePosition - startPosition;
+            const movementPerRound = totalDistance / gameState.maxRounds;
+            
+            console.log('Movement calculation:', {
+                viewportWidth,
+                startPosition,
+                finishLinePosition,
+                totalDistance,
+                movementPerRound,
+                maxRounds: gameState.maxRounds
+            });
+            
+            return movementPerRound;
+        }
+
+        function startGame() {
+            console.log('Starting game...', {
+                currentGame: gameState.currentGame,
+                gameMode: gameState.gameMode,
+                isMultiplayer: gameState.isMultiplayer,
+                difficulty: gameState.difficulty
+            });
+            
+            // Route to appropriate game
+            if (gameState.currentGame === 'glassbridge') {
+                startGlassBridgeGame();
+                return;
+            }
+            
+            // Calculate movement per round for Red Light Green Light
+            gameState.movementPerRound = calculateMovementPerRound();
+            
+            // Clear any existing timers
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+                gameState.challengeTimer = null;
+            }
+            
+            // Ensure we have required elements for Red Light Green Light
+            if (!elements.doll || !elements.player || !elements.status) {
+                console.error('Required game elements not found!');
+                return;
+            }
+            
+            gameState.gameRunning = true;
+            
+            // Hide all menu elements and show quit button
+            if (elements.gameTitle) elements.gameTitle.style.display = 'none';
+            if (elements.gameModeSelector) elements.gameModeSelector.style.display = 'none';
+            if (elements.levelSelector) elements.levelSelector.style.display = 'none';
+            if (elements.multiplayerSetup) elements.multiplayerSetup.style.display = 'none';
+            if (elements.quitButton) elements.quitButton.style.display = 'block';
+            
+            // Start audio after UI is set up
+            try {
+                audioSystem.startBackgroundMusic();
+            } catch (audioError) {
+                console.warn('Audio start failed:', audioError);
+            }
+            
+            // Start the first round directly without status messages
+            setTimeout(() => {
+                startRound();
+            }, 500); // Small delay for audio to start
+        }
+
+        // Start a new round
+        function startRound() {
+            console.log('Starting round', gameState.round);
+            updateDisplay();
+            
+            // Turn doll back and start math challenge immediately
+            elements.doll.classList.add('turned-back');
+            
+            // Use appropriate math challenge based on game mode
+            if (gameState.isMultiplayer) {
+                // In multiplayer, the server handles this
+                console.log('Waiting for multiplayer challenge from server...');
+            } else {
+                // Single player mode - start math challenge directly
+                console.log('Starting single player math challenge');
+                showMathChallenge();
+            }
+        }
+
+        // Doll turns back (used for subsequent rounds)
+        function dollTurnsBack() {
+            console.log('dollTurnsBack called - gameRunning:', gameState.gameRunning);
+            if (!gameState.gameRunning) {
+                console.log('Game not running, skipping doll turn');
+                return;
+            }
+            
+            console.log('Doll is turning back for next round');
+            elements.doll.classList.add('turned-back');
+            audioSystem.playSound('alertSound'); // Alert when doll turns
+            
+            // Use appropriate math challenge based on game mode
+            if (gameState.isMultiplayer) {
+                // In multiplayer, the server handles this
+                console.log('Waiting for multiplayer challenge from server...');
+            } else {
+                // Single player mode
+                console.log('Starting single player math challenge');
+                showMathChallenge();
+            }
+        }
+
+        // Show math challenge
+        function showMathChallenge() {
+            generateEquation();
+            elements.mathChallenge.style.display = 'block';
+            elements.answerInput.value = '';
+            elements.answerInput.focus();
+            
+            // Show timer
+            elements.challengeTimerDisplay.style.display = 'block';
+            
+            // Start countdown
+            gameState.timeLeft = 75;
+            updateTimer();
+            
+            // Start ticker sound for urgency
+            audioSystem.startTicker();
+            
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+            }
+            
+            gameState.challengeTimer = setInterval(() => {
+                gameState.timeLeft--;
+                updateTimer();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.challengeTimer);
+                    audioSystem.stopTicker();
+                    gameOver('TIME UP!', 'You ran out of time! Try to solve faster next time!');
+                }
+            }, 1000);
+        }
+
+        // Update timer display
+        function updateTimer() {
+            if (elements.challengeTimerDisplay) {
+                elements.challengeTimerDisplay.textContent = `Time: ${gameState.timeLeft}s`;
+            }
+        }
+
+        // Generate equation based on difficulty
+        function generateEquation() {
+            if (gameState.difficulty === 'beginner') {
+                generateLinearEquation();
+            } else {
+                generateQuadraticEquation();
+            }
+        }
+
+        // Generate linear equation
+        function generateLinearEquation() {
+            const solution = Math.floor(Math.random() * 21) - 10;
+            const a = Math.floor(Math.random() * 9) + 2;
+            const b = Math.floor(Math.random() * 21) - 10;
+            const c = a * solution + b;
+            
+            let equation = `${a}x `;
+            if (b > 0) equation += `+ ${b} = ${c}`;
+            else if (b < 0) equation += `${b} = ${c}`;
+            else equation += `= ${c}`;
+            
+            elements.equation.textContent = equation;
+            gameState.currentEquation = { solutions: [solution] };
+        }
+
+        // Generate quadratic equation
+        function generateQuadraticEquation() {
+            const solution1 = Math.floor(Math.random() * 21) - 10;
+            let solution2 = Math.floor(Math.random() * 21) - 10;
+            
+            if (solution1 === solution2) {
+                solution2 = solution1 + (Math.random() < 0.5 ? 1 : -1);
+            }
+            
+            const b = -(solution1 + solution2);
+            const c = solution1 * solution2;
+            
+            let equation = `x² `;
+            if (b > 0) equation += `+ ${b}x `;
+            else if (b < 0) equation += `${b}x `;
+            
+            if (c > 0) equation += `+ ${c} = 0`;
+            else if (c < 0) equation += `${c} = 0`;
+            else equation += `= 0`;
+            
+            elements.equation.textContent = equation;
+            gameState.currentEquation = { 
+                solutions: [solution1, solution2].sort((a, b) => a - b) 
+            };
+        }
+
+        // Show multiplayer math challenge
+        function showMultiplayerMathChallenge(equation, timeLimit) {
+            elements.equation.textContent = equation;
+            elements.mathChallenge.style.display = 'block';
+            elements.answerInput.value = '';
+            elements.answerInput.focus();
+            
+            // Show timer
+            elements.challengeTimerDisplay.style.display = 'block';
+            
+            // Start countdown
+            gameState.timeLeft = timeLimit;
+            updateTimer();
+            
+            // Start ticker sound for urgency
+            audioSystem.startTicker();
+            
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+            }
+            
+            gameState.challengeTimer = setInterval(() => {
+                gameState.timeLeft--;
+                updateTimer();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.challengeTimer);
+                    audioSystem.stopTicker();
+                    // In multiplayer, the server handles timeout elimination
+                }
+            }, 1000);
+        }
+
+        // Submit answer
+        function submitAnswer() {
+            const userAnswer = parseInt(elements.answerInput.value);
+            
+            if (isNaN(userAnswer)) {
+                alert('Please enter a whole number!');
+                return;
+            }
+            
+            if (gameState.isMultiplayer) {
+                // Calculate solve time
+                const solveTime = multiplayerState.phaseStartTime ? 
+                    Math.floor((Date.now() - multiplayerState.phaseStartTime) / 1000) : 0;
+                
+                // Send answer to server
+                multiplayerHandler.submitAnswer(userAnswer, solveTime);
+                
+                // Hide challenge immediately
+                elements.mathChallenge.style.display = 'none';
+                elements.challengeTimerDisplay.style.display = 'none';
+                
+                if (gameState.challengeTimer) {
+                    clearInterval(gameState.challengeTimer);
+                }
+                audioSystem.stopTicker();
+                
+            } else {
+                // Single player mode
+                const isCorrect = gameState.currentEquation.solutions.includes(userAnswer);
+                
+                if (isCorrect) {
+                    correctAnswer();
+                } else {
+                    gameOver('TRY AGAIN!', `Not quite right! The correct answers were: ${gameState.currentEquation.solutions.join(' and ')}`);
+                }
+            }
+        }
+
+        // Handle correct answer
+        function correctAnswer() {
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+            }
+            audioSystem.stopTicker();
+            
+            // Play success sound
+            audioSystem.playSound('successSound');
+            
+            elements.mathChallenge.style.display = 'none';
+            elements.challengeTimerDisplay.style.display = 'none';
+            
+            // Move player forward
+            gameState.playerPosition += gameState.movementPerRound;
+            elements.player.style.left = `${gameState.playerPosition}px`;
+            
+            // Check win condition
+            if (gameState.round >= gameState.maxRounds) {
+                victory();
+                return;
+            }
+            
+            // Next round
+            gameState.round++;
+            elements.doll.classList.remove('turned-back');
+            
+            // Short delay before next round
+            setTimeout(() => {
+                if (gameState.gameRunning) {
+                    startRound();
+                }
+            }, 1000);
+        }
+
+        // Handle victory
+        function victory() {
+            gameState.gameRunning = false;
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+            }
+            audioSystem.stopTicker();
+            audioSystem.stopBackgroundMusic();
+            
+            // Play victory sound
+            audioSystem.playSound('victorySound');
+            
+            elements.challengeTimerDisplay.style.display = 'none';
+            elements.gameOver.classList.add('victory');
+            elements.gameOverTitle.textContent = 'VICTORY!';
+            elements.gameOverText.textContent = 'You survived Red Light Green Light!';
+            elements.gameOver.style.display = 'block';
+            elements.player.classList.add('pulse');
+            
+            // Keep quit button visible even during victory
+            // elements.quitButton.style.display = 'block';
+        }
+
+        // Handle game over
+        function gameOver(title, message) {
+            gameState.gameRunning = false;
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+            }
+            audioSystem.stopTicker();
+            audioSystem.stopBackgroundMusic();
+            
+            // Play failure sound
+            audioSystem.playSound('failureSound');
+            
+            elements.mathChallenge.style.display = 'none';
+            elements.challengeTimerDisplay.style.display = 'none';
+            elements.status.style.display = 'none';
+            
+            // Keep quit button visible even during game over
+            // elements.quitButton.style.display = 'block';
+            
+            elements.gameOverTitle.textContent = title;
+            elements.gameOverText.textContent = message;
+            elements.gameOver.style.display = 'block';
+        }
+
+        // Show status message
+        function showStatus(text, isGreen) {
+            elements.status.textContent = text;
+            elements.status.className = isGreen ? 'status green-light' : 'status';
+            elements.status.style.display = 'block';
+            
+            setTimeout(() => {
+                if (gameState.gameRunning) {
+                    elements.status.style.display = 'none';
+                }
+            }, 3000);
+        }
+
+        // Update display
+        function updateDisplay() {
+            elements.progress.textContent = `Round: ${gameState.round}/${gameState.maxRounds}`;
+        }
+
+        // Select main game
+        function selectMainGame(game) {
+            console.log('Selecting main game:', game);
+            gameState.currentGame = game;
+            
+            // Hide main game selector
+            if (elements.mainGameSelector) elements.mainGameSelector.style.display = 'none';
+            
+            // Show game mode selector with appropriate description
+            if (elements.gameModeSelector) elements.gameModeSelector.style.display = 'block';
+            
+            // Update description based on selected game
+            if (elements.gameModeDescription) {
+                if (game === 'redlight') {
+                    elements.gameModeDescription.textContent = 'Choose how you want to play Red Light Green Light!';
+                } else if (game === 'glassbridge') {
+                    elements.gameModeDescription.textContent = 'Choose how you want to play Glass Bridge Challenge!';
+                }
+            }
+        }
+
+        // Select game mode
+        function selectGameMode(mode) {
+            console.log('Selecting game mode:', mode);
+            enableAudio(); // Enable audio on first user interaction
+            gameState.gameMode = mode;
+            elements.gameModeSelector.style.display = 'none';
+            
+            if (mode === 'single') {
+                gameState.isMultiplayer = false;
+                if (elements.leaderboard) elements.leaderboard.style.display = 'none';
+                if (elements.connectionStatus) elements.connectionStatus.style.display = 'none';
+                if (elements.levelSelector) elements.levelSelector.style.display = 'block';
+            } else {
+                gameState.isMultiplayer = true;
+                if (elements.connectionStatus) elements.connectionStatus.style.display = 'block';
+                if (elements.multiplayerSetup) elements.multiplayerSetup.style.display = 'block';
+                multiplayerHandler.connect();
+            }
+        }
+
+        // Quit game function
+        function quitGame() {
+            // Show confirmation dialog
+            const confirmQuit = confirm('Are you sure you want to quit the game? Your progress will be lost.');
+            
+            if (confirmQuit) {
+                // Stop all game processes
+                gameState.gameRunning = false;
+                glassBridgeState.gameRunning = false;
+                
+                if (gameState.challengeTimer) {
+                    clearInterval(gameState.challengeTimer);
+                }
+                if (glassBridgeState.bridgeTimer) {
+                    clearInterval(glassBridgeState.bridgeTimer);
+                }
+                
+                // Stop all sounds immediately
+                audioSystem.stopAllSounds();
+                
+                // Hide ALL game and overlay elements (supersede everything)
+                elements.mathChallenge.style.display = 'none';
+                elements.challengeTimerDisplay.style.display = 'none';
+                elements.status.style.display = 'none';
+                elements.quitButton.style.display = 'none';
+                elements.gameOver.style.display = 'none';
+                elements.gameOver.classList.remove('victory');
+                elements.levelSelector.style.display = 'none';
+                elements.multiplayerSetup.style.display = 'none';
+                elements.audioNotice.style.display = 'none';
+                elements.glassBridgeGame.style.display = 'none';
+                
+                // Reset visual elements
+                elements.doll.classList.remove('turned-back');
+                elements.player.style.left = '50px';
+                elements.player.classList.remove('pulse');
+                
+                // Show title again
+                if (elements.gameTitle) elements.gameTitle.style.display = 'block';
+                
+                // Handle multiplayer disconnect
+                if (gameState.isMultiplayer && multiplayerHandler.websocket) {
+                    multiplayerHandler.websocket.close();
+                    elements.leaderboard.style.display = 'none';
+                    elements.connectionStatus.style.display = 'none';
+                    elements.ghostPlayers.innerHTML = '';
+                    
+                    // Reset multiplayer state
+                    multiplayerState = {
+                        websocket: null,
+                        playerId: null,
+                        roomId: null,
+                        playerName: '',
+                        otherPlayers: new Map(),
+                        leaderboard: [],
+                        connectionStatus: 'disconnected',
+                        phaseStartTime: null
+                    };
+                    
+                    // Reset multiplayer UI elements
+                    if (elements.joinRoomBtn) {
+                        elements.joinRoomBtn.textContent = '🚀 JOIN GAME';
+                        elements.joinRoomBtn.disabled = false;
+                    }
+                    if (elements.startMultiplayerBtn) elements.startMultiplayerBtn.style.display = 'none';
+                    if (elements.roomInfo) elements.roomInfo.style.display = 'none';
+                    if (elements.playerNameInput) elements.playerNameInput.value = '';
+                    if (elements.roomIdInput) elements.roomIdInput.value = '';
+                }
+                
+                // Reset game state completely
+                gameState = {
+                    round: 1,
+                    maxRounds: 5,
+                    timeLeft: 75,
+                    playerPosition: 50,
+                    movementPerRound: 0, // Will be calculated dynamically
+                    gameRunning: false,
+                    difficulty: null,
+                    currentEquation: { solutions: [] },
+                    challengeTimer: null,
+                    audioEnabled: gameState.audioEnabled,
+                    musicEnabled: gameState.musicEnabled,
+                    tickerInterval: null,
+                    gameMode: null,
+                    isMultiplayer: false,
+                    currentGame: null
+                };
+                
+                // Reset glass bridge state
+                glassBridgeState = {
+                    currentStep: 1,
+                    totalSteps: 10,
+                    lives: 3,
+                    playerPosition: 0,
+                    timeLeft: 60,
+                    currentEquation: null,
+                    correctAnswer: null,
+                    bridgeTimer: null,
+                    bridgeSteps: [],
+                    gameRunning: false
+                };
+                
+                // Show main game selector (supersede everything)
+                elements.mainGameSelector.style.display = 'block';
+            }
+        }
+
+        // Select difficulty level
+        function selectLevel(level) {
+            console.log('Selecting level:', level);
+            gameState.difficulty = level;
+            elements.levelSelector.style.display = 'none';
+            startGame();
+        }
+
+        // Join multiplayer room
+        function joinMultiplayerRoom() {
+            const playerName = elements.playerNameInput.value.trim();
+            const roomId = elements.roomIdInput.value.trim();
+            const difficulty = elements.multiplayerDifficulty.value;
+            
+            if (!playerName) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            if (playerName.length > 20) {
+                alert('Name must be 20 characters or less!');
+                return;
+            }
+            
+            gameState.difficulty = difficulty;
+            multiplayerHandler.joinRoom(playerName, roomId, difficulty);
+        }
+
+        // Start multiplayer game
+        function startMultiplayerGame() {
+            multiplayerHandler.startGame();
+        }
+
+        // Back to mode selection
+        function backToModeSelection() {
+            elements.multiplayerSetup.style.display = 'none';
+            elements.levelSelector.style.display = 'none';
+            elements.leaderboard.style.display = 'none';
+            elements.connectionStatus.style.display = 'none';
+            elements.gameModeSelector.style.display = 'block';
+            
+            // Show title again
+            if (elements.gameTitle) elements.gameTitle.style.display = 'block';
+            
+            // Reset multiplayer state
+            if (multiplayerHandler.websocket) {
+                multiplayerHandler.websocket.close();
+            }
+            multiplayerState = {
+                websocket: null,
+                playerId: null,
+                roomId: null,
+                playerName: '',
+                otherPlayers: new Map(),
+                leaderboard: [],
+                connectionStatus: 'disconnected',
+                phaseStartTime: null
+            };
+            
+            // Reset UI elements
+            elements.joinRoomBtn.textContent = '🚀 JOIN GAME';
+            elements.joinRoomBtn.disabled = false;
+            elements.startMultiplayerBtn.style.display = 'none';
+            elements.roomInfo.style.display = 'none';
+            elements.playerNameInput.value = '';
+            elements.roomIdInput.value = '';
+            elements.ghostPlayers.innerHTML = '';
+        }
+
+        // Restart game
+        function restartGame() {
+            // Clear timers
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+            }
+            if (glassBridgeState.bridgeTimer) {
+                clearInterval(glassBridgeState.bridgeTimer);
+            }
+            audioSystem.stopTicker();
+            audioSystem.stopBackgroundMusic();
+            
+            // Reset both game states
+            gameState = {
+                round: 1,
+                maxRounds: 5,
+                timeLeft: 75,
+                playerPosition: 50,
+                movementPerRound: 0, // Will be calculated dynamically
+                gameRunning: false,
+                difficulty: null,
+                currentEquation: { solutions: [] },
+                challengeTimer: null,
+                audioEnabled: gameState.audioEnabled, // Keep audio preferences
+                musicEnabled: gameState.musicEnabled,
+                tickerInterval: null,
+                gameMode: null,
+                isMultiplayer: false,
+                currentGame: null
+            };
+            
+            glassBridgeState = {
+                currentStep: 1,
+                totalSteps: 10,
+                lives: 3,
+                playerPosition: 0,
+                timeLeft: 60,
+                currentEquation: null,
+                correctAnswer: null,
+                bridgeTimer: null,
+                bridgeSteps: [],
+                gameRunning: false
+            };
+            
+            // Reset UI
+            elements.gameOver.style.display = 'none';
+            elements.gameOver.classList.remove('victory');
+            elements.mathChallenge.style.display = 'none';
+            elements.challengeTimerDisplay.style.display = 'none';
+            elements.glassBridgeGame.style.display = 'none';
+            elements.doll.classList.remove('turned-back');
+            elements.player.style.left = '50px';
+            elements.player.classList.remove('pulse');
+            elements.status.style.display = 'none';
+            elements.quitButton.style.display = 'none';
+            
+            // Show title and main game selector
+            if (elements.gameTitle) elements.gameTitle.style.display = 'block';
+            elements.mainGameSelector.style.display = 'block';
+            elements.gameModeSelector.style.display = 'none';
+            elements.multiplayerSetup.style.display = 'none';
+            elements.leaderboard.style.display = 'none';
+            elements.connectionStatus.style.display = 'none';
+        }
+
+        // Toggle audio
+        function toggleAudio() {
+            gameState.audioEnabled = !gameState.audioEnabled;
+            elements.muteBtn.textContent = gameState.audioEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+            elements.muteBtn.classList.toggle('muted', !gameState.audioEnabled);
+        }
+
+        // Toggle music
+        function toggleMusic() {
+            gameState.musicEnabled = !gameState.musicEnabled;
+            elements.volumeBtn.textContent = gameState.musicEnabled ? '🎵 Music' : '🎵 Music OFF';
+            elements.volumeBtn.classList.toggle('muted', !gameState.musicEnabled);
+            
+            // Check if any game is running (Red Light Green Light or Glass Bridge)
+            const isAnyGameRunning = gameState.gameRunning || glassBridgeState.gameRunning;
+            
+            if (gameState.musicEnabled && isAnyGameRunning) {
+                audioSystem.resumeBackgroundMusic();
+            } else {
+                audioSystem.pauseBackgroundMusic();
+            }
+        }
+
+        // Glass Bridge Game Functions
+        function startGlassBridgeGame() {
+            console.log('Starting Glass Bridge game with difficulty:', gameState.difficulty);
+            
+            // Initialize bridge state
+            glassBridgeState.currentStep = 1;
+            glassBridgeState.lives = 3;
+            glassBridgeState.playerPosition = 0;
+            glassBridgeState.gameRunning = true;
+            glassBridgeState.bridgeSteps = [];
+            
+            // Show glass bridge game elements
+            if (elements.glassBridgeGame) elements.glassBridgeGame.style.display = 'block';
+            if (elements.quitButton) elements.quitButton.style.display = 'block';
+            
+            // Hide other game elements
+            if (elements.gameModeSelector) elements.gameModeSelector.style.display = 'none';
+            if (elements.levelSelector) elements.levelSelector.style.display = 'none';
+            if (elements.gameTitle) elements.gameTitle.style.display = 'none';
+            if (elements.mainGameSelector) elements.mainGameSelector.style.display = 'none';
+            
+            // Generate bridge visual
+            generateBridgeVisual();
+            
+            // Start first challenge
+            startBridgeChallenge();
+            
+            // Start background music (use resume to respect pause/play state, start if nothing to resume)
+            if (gameState.musicEnabled) {
+                // Try to resume first, if nothing to resume, start fresh
+                const hadMusicToResume = audioSystem.hasMusicToResume();
+                audioSystem.resumeBackgroundMusic();
+                
+                // If there was no music to resume, start fresh
+                if (!hadMusicToResume) {
+                    audioSystem.startBackgroundMusic();
+                }
+            }
+        }
+
+        function generateBridgeVisual() {
+            if (!elements.bridgeVisual) return;
+            
+            elements.bridgeVisual.innerHTML = '';
+            glassBridgeState.bridgeSteps = [];
+            
+            for (let i = 0; i < glassBridgeState.totalSteps; i++) {
+                const step = document.createElement('div');
+                step.className = 'bridge-step';
+                step.style.left = `${(i * 55) + 10}px`;
+                
+                if (i < glassBridgeState.currentStep - 1) {
+                    step.classList.add('completed');
+                } else if (i === glassBridgeState.currentStep - 1) {
+                    step.classList.add('current');
+                }
+                
+                elements.bridgeVisual.appendChild(step);
+                glassBridgeState.bridgeSteps.push(step);
+            }
+            
+            // Update player position to be on current step
+            updateBridgePlayerPosition();
+        }
+
+        function updateBridgePlayerPosition() {
+            if (!elements.bridgePlayer) return;
+            
+            // Calculate player position relative to the centered bridge
+            // Bridge is centered on screen with width 600px
+            const viewportWidth = window.innerWidth;
+            const bridgeWidth = 600;
+            const bridgeLeftOffset = (viewportWidth - bridgeWidth) / 2; // Left edge of the bridge
+            
+            // Position player on top of the current step
+            // Each step is at position (i * 55) + 10 relative to bridge left edge
+            const stepIndex = glassBridgeState.currentStep - 1; // Convert to 0-based index
+            const stepPositionInBridge = (stepIndex * 55) + 10; // Position within bridge
+            const playerXPosition = bridgeLeftOffset + stepPositionInBridge + 10; // Absolute position + centering offset
+            
+            elements.bridgePlayer.style.left = `${playerXPosition}px`;
+            // Top position is set in CSS (290px), only update horizontal position
+            
+            console.log('Player positioned:', {
+                currentStep: glassBridgeState.currentStep,
+                stepIndex,
+                bridgeLeftOffset,
+                stepPositionInBridge,
+                playerXPosition
+            });
+        }
+
+        function startBridgeChallenge() {
+            if (!glassBridgeState.gameRunning) return;
+            
+            // Update progress display
+            if (elements.bridgeStepCounter) {
+                elements.bridgeStepCounter.textContent = `Step ${glassBridgeState.currentStep} of ${glassBridgeState.totalSteps}`;
+            }
+            if (elements.bridgeLives) {
+                elements.bridgeLives.textContent = `❤️ Lives: ${glassBridgeState.lives}`;
+            }
+            
+            // Generate new math equation based on difficulty
+            let equationText, correctAnswer;
+            
+            if (gameState.difficulty === 'beginner') {
+                // Linear equation: ax + b = c, solve for x
+                const solution = Math.floor(Math.random() * 21) - 10; // -10 to 10
+                const a = Math.floor(Math.random() * 9) + 2; // 2 to 10
+                const b = Math.floor(Math.random() * 21) - 10; // -10 to 10
+                const c = a * solution + b;
+                
+                equationText = `${a}x `;
+                if (b > 0) equationText += `+ ${b} = ${c}`;
+                else if (b < 0) equationText += `${b} = ${c}`;
+                else equationText += `= ${c}`;
+                
+                correctAnswer = solution;
+            } else {
+                // Advanced: Quadratic equation ax² + bx + c = 0, find one solution
+                const solution1 = Math.floor(Math.random() * 11) - 5; // -5 to 5
+                let solution2 = Math.floor(Math.random() * 11) - 5;
+                
+                if (solution1 === solution2) {
+                    solution2 = solution1 + (Math.random() < 0.5 ? 1 : -1);
+                }
+                
+                const b = -(solution1 + solution2);
+                const c = solution1 * solution2;
+                
+                equationText = `x² `;
+                if (b > 0) equationText += `+ ${b}x `;
+                else if (b < 0) equationText += `${b}x `;
+                
+                if (c > 0) equationText += `+ ${c} = 0`;
+                else if (c < 0) equationText += `${c} = 0`;
+                else equationText += `= 0`;
+                
+                correctAnswer = Math.random() < 0.5 ? solution1 : solution2; // Pick one solution randomly
+            }
+            
+            glassBridgeState.correctAnswer = correctAnswer;
+            
+            // Display equation
+            if (elements.bridgeEquation) {
+                elements.bridgeEquation.textContent = equationText;
+            }
+            
+            // Generate wrong answer
+            const wrongAnswer = generateWrongAnswer(glassBridgeState.correctAnswer);
+            
+            // Randomly assign correct and wrong answers to left/right panels
+            const leftIsCorrect = Math.random() < 0.5;
+            
+            if (elements.leftAnswer) {
+                elements.leftAnswer.textContent = leftIsCorrect ? glassBridgeState.correctAnswer : wrongAnswer;
+            }
+            if (elements.rightAnswer) {
+                elements.rightAnswer.textContent = leftIsCorrect ? wrongAnswer : glassBridgeState.correctAnswer;
+            }
+            
+            // Store which side is correct
+            glassBridgeState.leftIsCorrect = leftIsCorrect;
+            
+            // Start timer
+            glassBridgeState.timeLeft = 60;
+            startBridgeTimer();
+        }
+
+        function generateWrongAnswer(correctAnswer) {
+            // Generate a wrong answer that's close but not identical
+            const offset = Math.floor(Math.random() * 6) + 1; // 1-6
+            const direction = Math.random() < 0.5 ? -1 : 1;
+            let wrongAnswer = correctAnswer + (offset * direction);
+            
+            // Make sure it's not the same as correct answer
+            if (wrongAnswer === correctAnswer) {
+                wrongAnswer = correctAnswer + (direction * -1 * offset);
+            }
+            
+            return wrongAnswer;
+        }
+
+        function startBridgeTimer() {
+            if (glassBridgeState.bridgeTimer) {
+                clearInterval(glassBridgeState.bridgeTimer);
+            }
+            
+            glassBridgeState.bridgeTimer = setInterval(() => {
+                    if (glassBridgeState.timeLeft > 0) {
+                        glassBridgeState.timeLeft--;
+                    }
+                    if (elements.bridgeTimer) {
+                        elements.bridgeTimer.textContent = `Time: ${glassBridgeState.timeLeft}s`;
+                        // Add visual warning when time is running low
+                        if (glassBridgeState.timeLeft <= 10) {
+                            elements.bridgeTimer.style.color = '#ff4444';
+                            elements.bridgeTimer.style.fontSize = '20px';
+                            // Play heartbeat sound for last 10 seconds
+                            if (glassBridgeState.timeLeft <= 10 && glassBridgeState.timeLeft > 0) {
+                                audioSystem.playSound('tickSound');
+                            }
+                            if (glassBridgeState.timeLeft <= 5) {
+                                elements.bridgeTimer.style.animation = 'pulse 0.5s infinite';
+                            }
+                        } else {
+                            elements.bridgeTimer.style.color = '#ffff00';
+                            elements.bridgeTimer.style.fontSize = '18px';
+                            elements.bridgeTimer.style.animation = 'none';
+                        }
+                    }
+                    if (glassBridgeState.timeLeft === 0) {
+                        clearInterval(glassBridgeState.bridgeTimer);
+                        glassBridgeState.bridgeTimer = null;
+                        handleTimeout();
+                    }
+            }, 1000);
+        }
+
+        function chooseBridgePanel(isLeft) {
+            if (!glassBridgeState.gameRunning) return;
+            
+            // Clear timer
+            if (glassBridgeState.bridgeTimer) {
+                clearInterval(glassBridgeState.bridgeTimer);
+                glassBridgeState.bridgeTimer = null;
+            }
+            
+            // Check if answer is correct
+            const isCorrect = (isLeft && glassBridgeState.leftIsCorrect) || (!isLeft && !glassBridgeState.leftIsCorrect);
+            
+            if (isCorrect) {
+                handleCorrectAnswer();
+            } else {
+                handleWrongAnswer();
+            }
+        }
+
+        function handleCorrectAnswer() {
+            console.log('Correct answer! Moving forward...');
+            audioSystem.playSound('successSound');
+            
+            // Show success feedback
+            showBridgeFeedback('🎉 CORRECT! Safe step forward!', 'success');
+            
+            // Move player forward - this is now handled by updateBridgePlayerPosition()
+            // which positions the player on the current step
+            
+            // Update step
+            glassBridgeState.currentStep++;
+            
+            // Update player position to be on the new current step
+            updateBridgePlayerPosition();
+            
+            // Check if bridge is completed
+            if (glassBridgeState.currentStep > glassBridgeState.totalSteps) {
+                handleBridgeVictory();
+                return;
+            }
+            
+            // Update visual
+            generateBridgeVisual();
+            
+            // Show confirmation dialog before moving to next question
+            setTimeout(() => {
+                showNextQuestionConfirmation();
+            }, 2000);
+        }
+
+        function handleTimeout() {
+            console.log('Time over! No selection made...');
+            audioSystem.playSound('alertSound');
+            
+            // Show timeout message
+            showBridgeFeedback('⏰ Time Over! You didn\'t select any answer!', 'error');
+            
+            // Show confirmation dialog to proceed to next question
+            setTimeout(() => {
+                showTimeoutConfirmation();
+            }, 2000);
+        }
+        
+        function showTimeoutConfirmation() {
+            // Create timeout confirmation dialog
+            const timeoutDialog = document.createElement('div');
+            timeoutDialog.id = 'timeoutConfirmation';
+            timeoutDialog.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            `;
+            
+            const timeoutBox = document.createElement('div');
+            timeoutBox.style.cssText = `
+                background: linear-gradient(135deg, #2d1b00, #4d2600);
+                color: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                border: 3px solid #ff6600;
+                box-shadow: 0 0 30px rgba(255, 102, 0, 0.5);
+                max-width: 450px;
+            `;
+            
+            timeoutBox.innerHTML = `
+                <h2 style="color: #ff6600; margin-bottom: 20px;">⏰ Time's Up!</h2>
+                <p style="margin-bottom: 25px; font-size: 18px; line-height: 1.4;">
+                    You didn't select any answer in time!<br>
+                    This counts as an incorrect attempt.<br><br>
+                    Ready to continue to the next question?
+                </p>
+                <button id="continueTimeoutBtn" style="
+                    background: linear-gradient(45deg, #ff6600, #cc5500);
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    margin: 0 10px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">➡️ CONTINUE</button>
+                <button id="waitTimeoutBtn" style="
+                    background: linear-gradient(45deg, #666666, #444444);
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    margin: 0 10px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">⏸️ WAIT A MOMENT</button>
+            `;
+            
+            timeoutDialog.appendChild(timeoutBox);
+            document.body.appendChild(timeoutDialog);
+            
+            // Add event listeners
+            document.getElementById('continueTimeoutBtn').addEventListener('click', () => {
+                document.body.removeChild(timeoutDialog);
+                // Proceed as if wrong answer (lose a life and continue)
+                proceedAfterTimeout();
+            });
+            
+            document.getElementById('waitTimeoutBtn').addEventListener('click', () => {
+                document.body.removeChild(timeoutDialog);
+                // Show a brief message and then proceed anyway after 3 seconds
+                showBridgeFeedback('Taking a moment... Moving to next question!', 'error');
+                setTimeout(() => {
+                    proceedAfterTimeout();
+                }, 3000);
+            });
+            
+            // Auto-proceed after 10 seconds if no action
+            setTimeout(() => {
+                if (document.getElementById('timeoutConfirmation')) {
+                    document.body.removeChild(timeoutDialog);
+                    proceedAfterTimeout();
+                }
+            }, 10000);
+        }
+        
+        function proceedAfterTimeout() {
+            // Lose a life for not answering in time
+            glassBridgeState.lives--;
+            
+            if (glassBridgeState.lives <= 0) {
+                // Game over
+                setTimeout(() => {
+                    handleBridgeGameOver();
+                }, 500);
+            } else {
+                // Stay on the same step - player should not advance without correct answer
+                // Don't increment currentStep - player must answer correctly to move forward
+                
+                // Check if bridge is completed
+                if (glassBridgeState.currentStep > glassBridgeState.totalSteps) {
+                    handleBridgeVictory();
+                    return;
+                }
+                
+                // Update visual and start next challenge
+                generateBridgeVisual();
+                setTimeout(() => {
+                    startBridgeChallenge();
+                }, 1000);
+            }
+        }
+
+        function handleWrongAnswer() {
+            console.log('Wrong answer! Glass breaks...');
+            audioSystem.playSound('failureSound');
+            
+            // Show wrong answer feedback
+            showBridgeFeedback('❌ OOPS! Wrong glass - try again!', 'error');
+            
+            // Glass breaking animation
+            const wrongPanel = glassBridgeState.leftIsCorrect ? elements.rightPanel : elements.leftPanel;
+            if (wrongPanel) {
+                wrongPanel.classList.add('glass-break-animation');
+            }
+            
+            // Lose a life
+            glassBridgeState.lives--;
+            
+            if (glassBridgeState.lives <= 0) {
+                // Game over
+                setTimeout(() => {
+                    handleBridgeGameOver();
+                }, 1500);
+            } else {
+                // Restart from beginning with remaining lives
+                setTimeout(() => {
+                    resetBridgePosition();
+                    startBridgeChallenge();
+                }, 2500);
+            }
+        }
+
+        function resetBridgePosition() {
+            glassBridgeState.currentStep = 1;
+            glassBridgeState.playerPosition = 0;
+            
+            // Remove any animation classes
+            if (elements.leftPanel) elements.leftPanel.classList.remove('glass-break-animation');
+            if (elements.rightPanel) elements.rightPanel.classList.remove('glass-break-animation');
+            
+            generateBridgeVisual(); // This will call updateBridgePlayerPosition() automatically
+        }
+
+        function handleBridgeVictory() {
+            console.log('Bridge completed successfully!');
+            glassBridgeState.gameRunning = false;
+            audioSystem.playSound('victorySound');
+            
+            // Show victory message
+            if (elements.gameOver) {
+                elements.gameOver.style.display = 'block';
+                elements.gameOver.classList.add('victory');
+            }
+            if (elements.gameOverTitle) {
+                elements.gameOverTitle.textContent = 'AMAZING SUCCESS!';
+            }
+            if (elements.gameOverText) {
+                elements.gameOverText.textContent = 'Congratulations! You solved all the math problems and crossed the bridge safely!';
+            }
+        }
+
+        function showBridgeFeedback(message, type) {
+            // Create or get feedback element
+            let feedbackEl = document.getElementById('bridgeFeedback');
+            if (!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = 'bridgeFeedback';
+                feedbackEl.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: ${type === 'success' ? 'rgba(0, 255, 0, 0.9)' : 'rgba(255, 100, 100, 0.9)'};
+                    color: white;
+                    padding: 20px 40px;
+                    border-radius: 15px;
+                    font-size: 24px;
+                    font-weight: bold;
+                    text-align: center;
+                    z-index: 1000;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+                    border: 3px solid ${type === 'success' ? '#00ff00' : '#ff6666'};
+                `;
+                elements.glassBridgeGame.appendChild(feedbackEl);
+            }
+            
+            feedbackEl.textContent = message;
+            feedbackEl.style.display = 'block';
+            
+            // Hide after 1.5 seconds
+            setTimeout(() => {
+                feedbackEl.style.display = 'none';
+            }, 1500);
+        }
+
+        function handleBridgeGameOver() {
+            console.log('Bridge game over - used all attempts');
+            glassBridgeState.gameRunning = false;
+            audioSystem.stopAllSounds();
+            
+            // Show game over message
+            if (elements.gameOver) {
+                elements.gameOver.style.display = 'block';
+                elements.gameOver.classList.remove('victory');
+            }
+            if (elements.gameOverTitle) {
+                elements.gameOverTitle.textContent = 'BRIDGE CHALLENGE OVER!';
+            }
+            if (elements.gameOverText) {
+                elements.gameOverText.textContent = 'You used all your attempts! Practice more and try again!';
+            }
+        }
+
+        function showNextQuestionConfirmation() {
+            // Create confirmation dialog
+            const confirmDialog = document.createElement('div');
+            confirmDialog.id = 'nextQuestionConfirmation';
+            confirmDialog.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            `;
+            
+            const confirmBox = document.createElement('div');
+            confirmBox.style.cssText = `
+                background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+                color: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                border: 3px solid #00ff00;
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+                max-width: 400px;
+            `;
+            
+            confirmBox.innerHTML = `
+                <h2 style="color: #00ff00; margin-bottom: 20px;">🎉 Great Job!</h2>
+                <p style="margin-bottom: 25px; font-size: 18px;">You solved the math problem correctly!<br>Ready to move to the next step?</p>
+                <button id="proceedBtn" style="
+                    background: linear-gradient(45deg, #00ff00, #00cc00);
+                    color: white;
+                    border: none;
+                    padding: 12px 25px;
+                    margin: 0 10px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">✅ CONTINUE</button>
+                <button id="stayBtn" style="
+                    background: linear-gradient(45deg, #ff6600, #cc5500);
+                    color: white;
+                    border: none;
+                    padding: 12px 25px;
+                    margin: 0 10px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">⏸️ WAIT</button>
+            `;
+            
+            confirmDialog.appendChild(confirmBox);
+            document.body.appendChild(confirmDialog);
+            
+            // Add event listeners
+            document.getElementById('proceedBtn').addEventListener('click', () => {
+                document.body.removeChild(confirmDialog);
+                startBridgeChallenge();
+            });
+            
+            document.getElementById('stayBtn').addEventListener('click', () => {
+                document.body.removeChild(confirmDialog);
+                // Show a brief message and then proceed anyway after 3 seconds
+                showBridgeFeedback('Taking a moment... Next question coming up!', 'success');
+                setTimeout(() => {
+                    startBridgeChallenge();
+                }, 3000);
+            });
+            
+            // Auto-proceed after 10 seconds if no action
+            setTimeout(() => {
+                if (document.getElementById('nextQuestionConfirmation')) {
+                    document.body.removeChild(confirmDialog);
+                    startBridgeChallenge();
+                }
+            }, 10000);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initElements();
+            audioSystem.init();
+            
+            // Main game selection
+            elements.redLightGameBtn.addEventListener('click', () => selectMainGame('redlight'));
+            elements.glassBridgeGameBtn.addEventListener('click', () => selectMainGame('glassbridge'));
+            
+            // Game mode selection
+            elements.singlePlayerBtn.addEventListener('click', () => selectGameMode('single'));
+            elements.multiplayerBtn.addEventListener('click', () => selectGameMode('multiplayer'));
+            
+            // Level selection
+            elements.beginnerBtn.addEventListener('click', () => selectLevel('beginner'));
+            elements.advancedBtn.addEventListener('click', () => selectLevel('advanced'));
+            
+            // Multiplayer controls
+            elements.joinRoomBtn.addEventListener('click', joinMultiplayerRoom);
+            elements.startMultiplayerBtn.addEventListener('click', startMultiplayerGame);
+            elements.backToModeBtn.addEventListener('click', backToModeSelection);
+            
+            // Submit answer
+            elements.submitBtn.addEventListener('click', submitAnswer);
+            
+            // Restart game
+            elements.restartBtn.addEventListener('click', restartGame);
+            
+            // Game controls
+            elements.quitButton.addEventListener('click', quitGame);
+            
+            // Glass bridge controls
+            elements.leftPanel.addEventListener('click', () => chooseBridgePanel(true));
+            elements.rightPanel.addEventListener('click', () => chooseBridgePanel(false));
+            
+            // Audio controls
+            elements.muteBtn.addEventListener('click', toggleAudio);
+            elements.volumeBtn.addEventListener('click', toggleMusic);
+            elements.enableAudioBtn.addEventListener('click', manualEnableAudio);
+            
+            // Enter key support
+            elements.answerInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    submitAnswer();
+                }
+            });
+
+            // Enter key support for player name
+            elements.playerNameInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    joinMultiplayerRoom();
+                }
+            });
+
+            // Enter key support for room ID
+            elements.roomIdInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    joinMultiplayerRoom();
+                }
+            });
+            
+            // Handle window resize to recalculate movement
+            window.addEventListener('resize', function() {
+                if (gameState.currentGame === 'redlight' && gameState.gameRunning) {
+                    gameState.movementPerRound = calculateMovementPerRound();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
