@@ -1087,9 +1087,7 @@
                 <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
             </div>
             
-            <div style="margin: 20px 0; color: #cccccc; font-size: 14px; text-align: center;">
-                🎮 <strong>Auto-Join Game Lobby</strong> - No room codes needed!
-            </div>
+
             
             <div style="margin: 20px 0;">
                 <label style="color: #cccccc; margin-right: 15px;">Difficulty:</label>
@@ -2521,14 +2519,26 @@
         // Continue to next player
         function continueToNextPlayer() {
             elements.gameOver.style.display = 'none';
+            
             // Reset game state for next player
             gameState.round = 1;
             gameState.gameRunning = false;
             gameState.glassBridgeIndex = 0;
             gameState.bridgePattern = [];
+            gameState.playerPosition = 50; // Reset player position
+            gameState.currentGame = 'redlight'; // Reset to Red Light Green Light
+            
+            // Clear any existing timers
+            if (gameState.challengeTimer) {
+                clearInterval(gameState.challengeTimer);
+                gameState.challengeTimer = null;
+            }
             
             // Update player indicator
             showCurrentPlayerIndicator();
+            
+            // Hide game over screen and show game interface
+            elements.levelSelector.style.display = 'block';
             
             // Start fresh game
             startGame();
@@ -2828,22 +2838,52 @@
 
         // Show option for second player
         function showSecondPlayerOption() {
+            // Hide the main setup interface to avoid overlap
+            elements.multiplayerSetup.style.display = 'none';
+            
+            // Create a clean player 2 setup screen
             elements.roomInfo.style.display = 'block';
             elements.roomInfo.innerHTML = `
-                <div style="color: #00ff00; margin: 10px 0;">
-                    <h3>🎮 Player 1 Ready: ${gameState.localMultiplayer.players[0]}</h3>
-                    <p>Add a second player or start playing solo:</p>
-                    <input type="text" id="player2NameInput" placeholder="Player 2 Name (optional)" 
-                           style="padding: 10px; margin: 10px 0; width: 200px; border-radius: 5px; background: rgba(0,0,0,0.8); color: white; border: 2px solid #00ff00;">
-                    <br>
-                    <button onclick="addSecondPlayer()" class="level-btn beginner-btn" style="margin: 5px;">
-                        👥 Add Player 2
-                    </button>
-                    <button onclick="startLocalMultiplayerGame()" class="level-btn advanced-btn" style="margin: 5px;">
-                        🚀 Start Solo
-                    </button>
+                <div style="text-align: center; color: #ffffff; padding: 20px;">
+                    <h2 style="color: #00ff00; margin-bottom: 20px;">🎮 Player Setup Complete</h2>
+                    <div style="background: rgba(0,255,0,0.1); border: 2px solid #00ff00; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                        <h3 style="color: #00ff00; margin-bottom: 15px;">✅ Player 1 Ready: ${gameState.localMultiplayer.players[0]}</h3>
+                        <p style="color: #cccccc; margin-bottom: 20px;">Would you like to add a second player?</p>
+                        
+                        <input type="text" id="player2NameInput" placeholder="Enter Player 2 Name" 
+                               style="padding: 12px; margin: 15px 0; width: 250px; border-radius: 8px; 
+                                      background: rgba(0,0,0,0.8); color: white; border: 2px solid #00ff00; 
+                                      font-size: 16px; text-align: center;">
+                        <br>
+                        
+                        <button onclick="addSecondPlayer()" class="level-btn beginner-btn" style="margin: 10px;">
+                            👥 Add Player 2 & Start
+                        </button>
+                        <button onclick="startLocalMultiplayerGame()" class="level-btn advanced-btn" style="margin: 10px;">
+                            🚀 Play Solo
+                        </button>
+                        <br>
+                        <button onclick="backToPlayerSetup()" class="level-btn" style="margin-top: 10px; background: #666;">
+                            ← Back
+                        </button>
+                    </div>
                 </div>
             `;
+        }
+
+        // Go back to player setup
+        function backToPlayerSetup() {
+            // Reset local multiplayer state
+            gameState.localMultiplayer = null;
+            gameState.isMultiplayer = false;
+            
+            // Show the main multiplayer setup again
+            elements.roomInfo.style.display = 'none';
+            elements.multiplayerSetup.style.display = 'block';
+            
+            // Reset the join button
+            elements.joinRoomBtn.textContent = '🎮 JOIN LOBBY';
+            elements.joinRoomBtn.disabled = false;
         }
 
         // Add second player
@@ -2868,8 +2908,19 @@
             elements.multiplayerSetup.style.display = 'none';
             elements.roomInfo.style.display = 'none';
             
+            // Properly initialize game state for local multiplayer
+            gameState.gameMode = 'multiplayer';
+            gameState.isMultiplayer = true;
+            gameState.currentGame = 'redlight'; // Start with Red Light Green Light
+            gameState.round = 1;
+            gameState.gameRunning = false;
+            
             // Show current player indicator
             showCurrentPlayerIndicator();
+            
+            // Hide main menu and show game interface
+            elements.gameModeSelector.style.display = 'none';
+            elements.levelSelector.style.display = 'block';
             
             // Start the game
             startGame();
