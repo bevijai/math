@@ -817,7 +817,7 @@
             top: 150px;
             left: 50%;
             transform: translateX(-50%);
-            width: 600px;
+            width: 350px;
             height: 200px;
             background: linear-gradient(to right, #444, #666);
             border: 3px solid #888;
@@ -927,7 +927,7 @@
         .bridge-player {
             position: absolute;
             top: 290px; /* Position on top of bridge (bridge bottom at 350px - player height 60px = 290px) */
-            left: 50px;
+            left: calc(50% - 160px); /* Initial position aligned with first panel */
             width: 30px;
             height: 60px;
             z-index: 180;
@@ -965,6 +965,46 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
+        }
+
+        /* Confetti Animation */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3000;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confetti-fall 3s linear forwards;
+            border-radius: 2px;
+        }
+
+        .confetti-piece:nth-child(2n) { background: #4ecdc4; }
+        .confetti-piece:nth-child(3n) { background: #45b7d1; }
+        .confetti-piece:nth-child(4n) { background: #f9ca24; }
+        .confetti-piece:nth-child(5n) { background: #6c5ce7; }
+        .confetti-piece:nth-child(6n) { background: #a55eea; }
+        .confetti-piece:nth-child(7n) { background: #26de81; }
+        .confetti-piece:nth-child(8n) { background: #fd79a8; }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -2353,6 +2393,9 @@
             // Play victory sound
             audioSystem.playSound('victorySound');
             
+            // Create confetti celebration
+            createConfetti();
+            
             elements.challengeTimerDisplay.style.display = 'none';
             elements.gameOver.classList.add('victory');
             elements.gameOverTitle.textContent = 'VICTORY!';
@@ -2761,7 +2804,7 @@
             for (let i = 0; i < glassBridgeState.totalSteps; i++) {
                 const step = document.createElement('div');
                 step.className = 'bridge-step';
-                step.style.left = `${(i * 55) + 10}px`;
+                step.style.left = `${(i * 60) + 25}px`;
                 
                 if (i < glassBridgeState.currentStep - 1) {
                     step.classList.add('completed');
@@ -2781,16 +2824,16 @@
             if (!elements.bridgePlayer) return;
             
             // Calculate player position relative to the centered bridge
-            // Bridge is centered on screen with width 600px
+            // Bridge is centered on screen with width 350px (updated for 5 panels)
             const viewportWidth = window.innerWidth;
-            const bridgeWidth = 600;
+            const bridgeWidth = 350;
             const bridgeLeftOffset = (viewportWidth - bridgeWidth) / 2; // Left edge of the bridge
             
             // Position player on top of the current step
-            // Each step is at position (i * 55) + 10 relative to bridge left edge
+            // Each step is at position (i * 65) + 15 relative to bridge left edge (adjusted for 5 panels)
             const stepIndex = glassBridgeState.currentStep - 1; // Convert to 0-based index
-            const stepPositionInBridge = (stepIndex * 55) + 10; // Position within bridge
-            const playerXPosition = bridgeLeftOffset + stepPositionInBridge + 10; // Absolute position + centering offset
+            const stepPositionInBridge = (stepIndex * 65) + 15; // Position within bridge (65px spacing for 5 panels)
+            const playerXPosition = bridgeLeftOffset + stepPositionInBridge; // Absolute position
             
             elements.bridgePlayer.style.left = `${playerXPosition}px`;
             // Top position is set in CSS (290px), only update horizontal position
@@ -3153,10 +3196,42 @@
             generateBridgeVisual(); // This will call updateBridgePlayerPosition() automatically
         }
 
+        // Confetti animation function
+        function createConfetti() {
+            const confettiContainer = document.createElement('div');
+            confettiContainer.className = 'confetti-container';
+            document.body.appendChild(confettiContainer);
+
+            // Create 100 confetti pieces
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                
+                // Random horizontal position
+                confetti.style.left = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                
+                // Random animation duration (2-4 seconds)
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                
+                confettiContainer.appendChild(confetti);
+            }
+
+            // Remove confetti after animation
+            setTimeout(() => {
+                document.body.removeChild(confettiContainer);
+            }, 5000);
+        }
+
         function handleBridgeVictory() {
             console.log('Bridge completed successfully!');
             glassBridgeState.gameRunning = false;
             audioSystem.playSound('victorySound');
+            
+            // Create confetti celebration
+            createConfetti();
             
             // Show victory message
             if (elements.gameOver) {
