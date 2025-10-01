@@ -1087,8 +1087,8 @@
                 <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
             </div>
             
-            <div style="margin: 20px 0;">
-                <input type="text" id="roomIdInput" placeholder="Room ID (leave empty for new room)" maxlength="10">
+            <div style="margin: 20px 0; color: #cccccc; font-size: 14px; text-align: center;">
+                🎮 <strong>Auto-Join Game Lobby</strong> - No room codes needed!
             </div>
             
             <div style="margin: 20px 0;">
@@ -1104,7 +1104,7 @@
                 <span id="playerCount">Players: 0</span>
             </div>
             
-            <button class="level-btn beginner-btn" id="joinRoomBtn">🚀 JOIN GAME</button>
+            <button class="level-btn beginner-btn" id="joinRoomBtn">🎮 JOIN LOBBY</button>
             <button class="level-btn advanced-btn" id="startMultiplayerBtn" style="display: none;">▶️ START GAME</button>
             <button class="level-btn" id="backToModeBtn" style="background: #666; margin-top: 15px;">← BACK</button>
         </div>
@@ -1394,7 +1394,7 @@
                 elements.currentRoomId.textContent = data.roomId;
                 elements.roomInfo.style.display = 'block';
                 elements.startMultiplayerBtn.style.display = 'block';
-                elements.joinRoomBtn.textContent = '✅ JOINED';
+                elements.joinRoomBtn.textContent = '✅ IN LOBBY';
                 elements.joinRoomBtn.disabled = true;
                 
                 // Update player count
@@ -2020,7 +2020,7 @@
                 'gameOverTitle', 'gameOverText', 'levelSelector', 'beginnerBtn',
                 'advancedBtn', 'submitBtn', 'restartBtn', 'muteBtn', 'volumeBtn',
                 'audioNotice', 'enableAudioBtn', 'gameModeSelector', 'singlePlayerBtn',
-                'multiplayerBtn', 'multiplayerSetup', 'playerNameInput', 'roomIdInput',
+                'multiplayerBtn', 'multiplayerSetup', 'playerNameInput',
                 'multiplayerDifficulty', 'joinRoomBtn', 'startMultiplayerBtn', 
                 'backToModeBtn', 'connectionStatus', 'leaderboard', 'leaderboardContent',
                 'ghostPlayers', 'roomInfo', 'currentRoomId', 'playerCount', 'quitButton',
@@ -2551,13 +2551,13 @@
                     
                     // Reset multiplayer UI elements
                     if (elements.joinRoomBtn) {
-                        elements.joinRoomBtn.textContent = '🚀 JOIN GAME';
+                        elements.joinRoomBtn.textContent = '🎮 JOIN LOBBY';
                         elements.joinRoomBtn.disabled = false;
                     }
                     if (elements.startMultiplayerBtn) elements.startMultiplayerBtn.style.display = 'none';
                     if (elements.roomInfo) elements.roomInfo.style.display = 'none';
                     if (elements.playerNameInput) elements.playerNameInput.value = '';
-                    if (elements.roomIdInput) elements.roomIdInput.value = '';
+
                 }
                 
                 // Reset game state completely
@@ -2606,10 +2606,9 @@
             startGame();
         }
 
-        // Join multiplayer room
+        // Join multiplayer room (simplified - no room IDs needed)
         function joinMultiplayerRoom() {
             const playerName = elements.playerNameInput.value.trim();
-            const roomId = elements.roomIdInput.value.trim();
             const difficulty = elements.multiplayerDifficulty.value;
             
             if (!playerName) {
@@ -2623,7 +2622,8 @@
             }
             
             gameState.difficulty = difficulty;
-            multiplayerHandler.joinRoom(playerName, roomId, difficulty);
+            // Auto-join default lobby (no room ID needed)
+            multiplayerHandler.joinRoom(playerName, 'main-lobby', difficulty);
         }
 
         // Start multiplayer game
@@ -2658,12 +2658,12 @@
             };
             
             // Reset UI elements
-            elements.joinRoomBtn.textContent = '🚀 JOIN GAME';
+            elements.joinRoomBtn.textContent = '🎮 JOIN LOBBY';
             elements.joinRoomBtn.disabled = false;
             elements.startMultiplayerBtn.style.display = 'none';
             elements.roomInfo.style.display = 'none';
             elements.playerNameInput.value = '';
-            elements.roomIdInput.value = '';
+
             elements.ghostPlayers.innerHTML = '';
         }
 
@@ -3437,12 +3437,7 @@
                 }
             });
 
-            // Enter key support for room ID
-            elements.roomIdInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    joinMultiplayerRoom();
-                }
-            });
+
             
             // Handle window resize to recalculate movement
             window.addEventListener('resize', function() {
