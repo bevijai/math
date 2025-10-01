@@ -927,7 +927,7 @@
         .bridge-player {
             position: absolute;
             top: 290px; /* Position on top of bridge (bridge bottom at 350px - player height 60px = 290px) */
-            left: calc(50% - 160px); /* Initial position aligned with first panel */
+            left: calc(50% - 135px); /* Initial position: bridge center - 175px + 25px + 15px for player centering */
             width: 30px;
             height: 60px;
             z-index: 180;
@@ -2830,10 +2830,10 @@
             const bridgeLeftOffset = (viewportWidth - bridgeWidth) / 2; // Left edge of the bridge
             
             // Position player on top of the current step
-            // Each step is at position (i * 65) + 15 relative to bridge left edge (adjusted for 5 panels)
+            // Each step is at position (i * 60) + 25 relative to bridge left edge (matching generateBridgeVisual)
             const stepIndex = glassBridgeState.currentStep - 1; // Convert to 0-based index
-            const stepPositionInBridge = (stepIndex * 65) + 15; // Position within bridge (65px spacing for 5 panels)
-            const playerXPosition = bridgeLeftOffset + stepPositionInBridge; // Absolute position
+            const stepPositionInBridge = (stepIndex * 60) + 25; // Position within bridge (matching step generation)
+            const playerXPosition = bridgeLeftOffset + stepPositionInBridge + 15; // Absolute position + centering offset for player width
             
             elements.bridgePlayer.style.left = `${playerXPosition}px`;
             // Top position is set in CSS (290px), only update horizontal position
