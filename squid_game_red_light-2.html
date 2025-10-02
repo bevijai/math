@@ -2807,6 +2807,8 @@
 
         // Local multiplayer setup for same device
         function setupLocalMultiplayer(player1Name, difficulty) {
+            console.log('Setting up local multiplayer for:', player1Name, difficulty);
+            
             // Store first player
             if (!gameState.localMultiplayer) {
                 gameState.localMultiplayer = {
@@ -2822,12 +2824,15 @@
             gameState.difficulty = difficulty;
             gameState.isMultiplayer = true;
             
+            console.log('Local multiplayer state:', gameState.localMultiplayer);
+            
             // Update UI to show player joined
             elements.joinRoomBtn.textContent = '✅ IN LOBBY';
             elements.joinRoomBtn.disabled = true;
             
             // Check if we need a second player
             if (gameState.localMultiplayer.players.length === 1) {
+                console.log('Calling showSecondPlayerOption...');
                 // Show option to add second player or start with one
                 showSecondPlayerOption();
             } else {
@@ -2838,6 +2843,20 @@
 
         // Show option for second player
         function showSecondPlayerOption() {
+            console.log('showSecondPlayerOption called');
+            console.log('elements.roomInfo:', elements.roomInfo);
+            console.log('elements.multiplayerSetup:', elements.multiplayerSetup);
+            
+            // Check if elements exist
+            if (!elements.roomInfo) {
+                console.error('roomInfo element not found!');
+                return;
+            }
+            if (!elements.multiplayerSetup) {
+                console.error('multiplayerSetup element not found!');
+                return;
+            }
+            
             // Hide the main setup interface to avoid overlap
             elements.multiplayerSetup.style.display = 'none';
             
